@@ -1,9 +1,9 @@
-package org.xiaoyume.simpleDB.tm;
+package org.xiaoyume.simpleDB.backend.tm;
 
 import junit.framework.TestCase;
 import org.junit.Test;
+import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;

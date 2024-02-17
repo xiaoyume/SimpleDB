@@ -1,7 +1,7 @@
-package org.xiaoyume.simpleDB.tm;
+package org.xiaoyume.simpleDB.backend.tm;
 
-import org.xiaoyume.simpleDB.common.Parser;
-import org.xiaoyume.simpleDB.utils.Panic;
+import org.xiaoyume.simpleDB.backend.common.Parser;
+import org.xiaoyume.simpleDB.backend.utils.Panic;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
