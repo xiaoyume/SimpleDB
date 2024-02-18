@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,17 +30,19 @@ public class TransactionManagerTest extends TestCase {
 
     @Test
     public void testMultiThread(){
-        tm = TransactionManager.create("D:\\db\\tmptranmger_test.xid");
+        tm = TransactionManager.create("D:\\db\\tranmger_test.xid");
         transMap = new ConcurrentHashMap<>();
         cdl = new CountDownLatch(noWorkers);
         for(int i = 0; i < noWorkers; i++){
             Runnable r = () -> woker();
-            new Thread(r).run();
+            new Thread(r).start();
         }
         try{
             cdl.await();
         }catch (Exception e){
             e.printStackTrace();
+        }finally {
+            new File("D:\\db\\tranmger_test.xid").delete();
         }
     }
 

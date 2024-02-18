@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.common;
 
 import org.junit.Test;
+import org.xiaoyume.simpleDB.backend.utils.Panic;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -32,11 +33,11 @@ public class CacheTest {
     private void work(){
         for(int i = 0; i < 1000; i++){
             long uid = new Random(System.nanoTime()).nextInt();
-            long h;
+            long h = 0;
             try{
                 h = cache.get(uid);
             }catch (Exception e){
-                continue;
+                Panic.panic(e);
             }
             assert h == uid;
         }

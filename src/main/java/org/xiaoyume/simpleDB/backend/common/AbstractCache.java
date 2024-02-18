@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractCache<T> {
     //实际缓存数据
     private HashMap<Long, T> cache;
-    //使用时间
+    //最近使用过的插到表头
     private LinkedList<Long> cacheKeysList;
     //正在获取资源的线程,线程安全实现
     private ConcurrentHashMap<Long, Boolean> getting;
@@ -31,7 +31,17 @@ public abstract class AbstractCache<T> {
         getting = new ConcurrentHashMap<>();
         lock = new ReentrantLock();
     }
-    public T get(long key) throws Exception {
+
+    /**
+     * 逻辑：
+     * 1.判断是否该资源正在被其它线程获取，如果是就循环等待
+     * 2.判断资源是否在缓存中，如果在直接返回，不在就需要从外部获取，读取数据需要时间，所以需要表示资源正在被线程获取
+     * 3.从外部读取数据,
+     * @param key
+     * @return
+     * @throws Exception
+     */
+    protected T get(long key) throws Exception {
         while(true){
             lock.lock();
             if(getting.containsKey(key)){
@@ -66,10 +76,10 @@ public abstract class AbstractCache<T> {
         try{
             //不在缓存获取资源
             obj = getForCache(key);
-        }catch (Exception e){
+        }catch (Exception e){//资源获取失败，释放资源获取状态
             lock.lock();
             getting.remove(key);
-            lock.lock();
+            lock.unlock();
             throw e;
         }
 
@@ -90,7 +100,7 @@ public abstract class AbstractCache<T> {
      * 释放一个缓存
      * @param key
      */
-    public void release(long key){
+    protected void release(long key){
         lock.lock();
         try{
             T obj = cache.get(key);
@@ -103,7 +113,7 @@ public abstract class AbstractCache<T> {
         }
     }
 
-    public void close(){
+    protected void close(){
         lock.lock();
         try{
             Set<Long> keys = cache.keySet();
