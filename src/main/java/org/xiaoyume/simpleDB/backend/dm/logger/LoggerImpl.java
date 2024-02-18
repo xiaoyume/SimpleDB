@@ -41,17 +41,21 @@ public class LoggerImpl implements Logger{
     private long position;//当前日志指针的位置
     private long fileSize;//文件大小，初始化才操作
     private int xChecksum;
-    public LoggerImpl(RandomAccessFile raf, FileChannel fc){
+    LoggerImpl(RandomAccessFile raf, FileChannel fc){
         this.file = raf;
         this.fc = fc;
         lock = new ReentrantLock();
     }
-    public LoggerImpl(RandomAccessFile raf, FileChannel fc, int xChecksum){
+    LoggerImpl(RandomAccessFile raf, FileChannel fc, int xChecksum){
         this.file = raf;
         this.fc = fc;
         this.xChecksum = xChecksum;
         lock = new ReentrantLock();
     }
+
+    /**
+     * open 后初始化lg
+     */
     void init(){
         long size = 0;
         try{
