@@ -1,6 +1,8 @@
 package org.xiaoyume.simpleDB.backend.dm.pcache;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
+import org.xiaoyume.simpleDB.backend.dm.page.Page;
+import org.xiaoyume.simpleDB.backend.dm.page.PageImpl;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
 import java.io.File;

@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm.pcache;
 
-import org.xiaoyume.simpleDB.backend.common.MockCache;
+import org.xiaoyume.simpleDB.backend.dm.page.MockPage;
+import org.xiaoyume.simpleDB.backend.dm.page.Page;
 
 import java.util.HashMap;
 import java.util.Map;

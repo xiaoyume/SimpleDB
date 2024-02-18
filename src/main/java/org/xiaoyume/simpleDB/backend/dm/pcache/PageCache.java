@@ -1,5 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm.pcache;
 
+import org.xiaoyume.simpleDB.backend.dm.page.Page;
+
 public interface PageCache {
     public static final int PAGE_SIZE = 1 << 13;//4096
     int newPage(byte[] initData);

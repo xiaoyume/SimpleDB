@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm.pcache;
 
 import org.junit.Test;
+import org.xiaoyume.simpleDB.backend.dm.page.Page;
 
 import java.io.File;
 

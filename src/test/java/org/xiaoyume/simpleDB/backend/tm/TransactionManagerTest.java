@@ -42,7 +42,7 @@ public class TransactionManagerTest extends TestCase {
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            new File("D:\\db\\tranmger_test.xid").delete();
+            assert new File("D:\\db\\tranmger_test.xid").delete();
         }
     }
 

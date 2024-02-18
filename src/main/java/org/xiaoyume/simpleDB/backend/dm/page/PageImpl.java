@@ -1,6 +1,6 @@
-package org.xiaoyume.simpleDB.backend.dm.pcache;
+package org.xiaoyume.simpleDB.backend.dm.page;
 
-import org.xiaoyume.simpleDB.backend.common.MockCache;
+import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -9,17 +9,20 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author xiaoy
  * @version 1.0
  * @description: TODO
- * @date 2024/2/18 14:08
+ * @date 2024/2/18 11:01
  */
-public class MockPage implements Page{
+public class PageImpl implements Page{
+
     private int pageNo;
     private byte[] data;
-    private Lock lock = new ReentrantLock();
-    public static MockPage newMockPage(int pageNo, byte[] data){
-        MockPage mockPage = new MockPage();
-        mockPage.pageNo = pageNo;
-        mockPage.data = data;
-        return mockPage;
+    private boolean dirty;
+    private Lock lock;
+    private PageCache pc;
+    public PageImpl(int pageNo, byte[] data, PageCache pc) {
+        this.pageNo = pageNo;
+        this.data = data;
+        this.pc = pc;
+        lock = new ReentrantLock();
     }
     @Override
     public void lock() {
@@ -33,17 +36,17 @@ public class MockPage implements Page{
 
     @Override
     public void release() {
-
+        pc.release(this);
     }
 
     @Override
     public void setDirty(boolean dirty) {
-
+        this.dirty = dirty;
     }
 
     @Override
     public boolean isDirty() {
-        return false;
+        return dirty;
     }
 
     @Override
