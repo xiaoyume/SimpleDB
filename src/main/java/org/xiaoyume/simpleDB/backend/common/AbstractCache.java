@@ -10,25 +10,27 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author xiaoy
  * @version 1.0
- * @description: 实现了一个执行LRU驱逐策略的通用缓存
+ * @description: 实现了一个引用计数策略的缓存
  * @date 2024/2/17 21:33
  */
 public abstract class AbstractCache<T> {
     //实际缓存数据
     private HashMap<Long, T> cache;
-    //最近使用过的插到表头
-    private LinkedList<Long> cacheKeysList;
-    //正在获取资源的线程,线程安全实现
-    private ConcurrentHashMap<Long, Boolean> getting;
+    //元素引用的个数
+    private HashMap<Long, Integer> references;
+    //正在获取资源的线程
+    private HashMap<Long, Boolean> getting;
 
     private int maxResource;
+    //缓存中的元素个数
+    private int count = 0;
     private Lock lock;
 
     public AbstractCache(int maxResource){
         this.maxResource = maxResource;
         cache = new HashMap<>();
-        cacheKeysList = new LinkedList<>();
-        getting = new ConcurrentHashMap<>();
+        references = new HashMap<>();
+        getting = new HashMap<>();
         lock = new ReentrantLock();
     }
 
@@ -59,14 +61,17 @@ public abstract class AbstractCache<T> {
             if(cache.containsKey(key)){
                 //资源在缓存中，直接返回
                 T obj = cache.get(key);
-                //更新使用时间
-                cacheKeysList.remove(key);
-                //最新使用的放到前面
-                cacheKeysList.addFirst(key);
+                references.put(key, references.get(key) + 1);
+
                 lock.unlock();
                 return obj;
             }
             //资源不在缓存中，正在请求资源，直接终端循环，需要读取资源
+            if(maxResource > 0 && count >= maxResource){
+                lock.unlock();
+                throw new RuntimeException("cache is full!");
+            }
+            count ++;
             getting.put(key, true);
             lock.unlock();
             break;
@@ -74,10 +79,11 @@ public abstract class AbstractCache<T> {
 
         T obj = null;
         try{
-            //不在缓存获取资源
+            //不在缓存,获取资源
             obj = getForCache(key);
         }catch (Exception e){//资源获取失败，释放资源获取状态
             lock.lock();
+            count --;
             getting.remove(key);
             lock.unlock();
             throw e;
@@ -86,28 +92,30 @@ public abstract class AbstractCache<T> {
         lock.lock();
         //移除正在获取资源的状态，入缓存，返回资源
         getting.remove(key);
-        if(cache.size() == maxResource){
-            //缓存已满释放一个资源
-            release(cacheKeysList.getLast());
-        }
         cache.put(key, obj);
-        cacheKeysList.addFirst(key);
+        references.put(key, 1);
         lock.unlock();
         return obj;
     }
 
     /**
-     * 释放一个缓存
+     * 资源被release一次就计数减1
      * @param key
      */
     protected void release(long key){
         lock.lock();
         try{
-            T obj = cache.get(key);
-            if(obj == null) return;
-            releaseForCache(obj);
-            cache.remove(key);
-            cacheKeysList.remove(key);
+            int ref = references.get(key) - 1;
+            if(ref == 0){
+                T obj = cache.get(key);
+                //资源被驱逐，释放资源
+                releaseForCache(obj);
+                references.remove(key);
+                cache.remove(key);
+                count --;
+            }else{
+                references.put(key, ref);
+            }
         }finally {
             lock.unlock();
         }
@@ -119,8 +127,8 @@ public abstract class AbstractCache<T> {
             Set<Long> keys = cache.keySet();
             for(long key : keys){
                 release(key);
+                references.remove(key);
                 cache.remove(key);
-                cacheKeysList.remove(key);
             }
         }finally {
             lock.unlock();
