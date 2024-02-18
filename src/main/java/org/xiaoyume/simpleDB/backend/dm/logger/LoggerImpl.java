@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm.logger;
 
 import com.google.common.primitives.Bytes;
-import org.xiaoyume.simpleDB.backend.common.Parser;
+import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
 import java.io.IOException;

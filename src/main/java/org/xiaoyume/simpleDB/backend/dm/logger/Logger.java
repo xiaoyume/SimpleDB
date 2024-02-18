@@ -1,9 +1,8 @@
 package org.xiaoyume.simpleDB.backend.dm.logger;
 
-import org.xiaoyume.simpleDB.backend.common.Parser;
+import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
-import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;

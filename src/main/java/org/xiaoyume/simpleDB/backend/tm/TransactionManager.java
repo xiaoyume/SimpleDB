@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.tm;
 
-import org.xiaoyume.simpleDB.backend.common.Parser;
+import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
 import java.io.File;

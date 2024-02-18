@@ -1,4 +1,4 @@
-package org.xiaoyume.simpleDB.backend.common;
+package org.xiaoyume.simpleDB.backend.utils;
 
 import java.nio.ByteBuffer;
 
@@ -9,6 +9,14 @@ import java.nio.ByteBuffer;
  * @date 2024/2/17 17:49
  */
 public class Parser {
+    public static byte[] short2Byte(short value){
+        return ByteBuffer.allocate(Short.SIZE / Byte.SIZE).putShort(value).array();
+    }
+
+    public static short parseShort(byte[] buf){
+        ByteBuffer buffer = ByteBuffer.wrap(buf, 0, 2);
+        return buffer.getShort();
+    }
 
     public static byte[] int2Byte(int value){
         return ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).putInt(value).array();
