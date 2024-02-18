@@ -9,6 +9,15 @@ import java.nio.ByteBuffer;
  * @date 2024/2/17 17:49
  */
 public class Parser {
+
+    public static byte[] int2Byte(int value){
+        return ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).putInt(value).array();
+    }
+
+    public static int parseInt(byte[] buf){
+        ByteBuffer buffer = ByteBuffer.wrap(buf, 0, 4);
+        return buffer.getInt();
+    }
     /**
      * 将一个长度为8字节的字节数组转换为一个long类型的整数
      * @param buf

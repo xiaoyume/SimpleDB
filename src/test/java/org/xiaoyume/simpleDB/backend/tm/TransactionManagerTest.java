@@ -30,7 +30,7 @@ public class TransactionManagerTest extends TestCase {
 
     @Test
     public void testMultiThread(){
-        tm = TransactionManager.create("D:\\db\\tranmger_test.xid");
+        tm = TransactionManager.create("D:\\db\\tranmger_test.db");
         transMap = new ConcurrentHashMap<>();
         cdl = new CountDownLatch(noWorkers);
         for(int i = 0; i < noWorkers; i++){
@@ -41,8 +41,6 @@ public class TransactionManagerTest extends TestCase {
             cdl.await();
         }catch (Exception e){
             e.printStackTrace();
-        }finally {
-            assert new File("D:\\db\\tranmger_test.xid").delete();
         }
     }
 

@@ -1,6 +1,12 @@
 package org.xiaoyume.simpleDB.backend.dm.pcache;
 
 import org.xiaoyume.simpleDB.backend.dm.page.Page;
+import org.xiaoyume.simpleDB.backend.utils.Panic;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 
 public interface PageCache {
     public static final int PAGE_SIZE = 1 << 13;//4096
@@ -12,4 +18,51 @@ public interface PageCache {
     void truncateByBgno(int maxPgno);
     int getPageNumber();
     void flushPage(Page pg);
+
+    /**
+     * 根据文件路径和内存大小创建PageCache
+     * @param path
+     * @param memory
+     * @return
+     */
+    public static PageCacheImpl create(String path, long memory){
+        File f = new File(path);
+        try{
+            if(!f.createNewFile()){
+                Panic.panic(new RuntimeException("file already exists!"));
+            }
+        }catch (Exception e){
+            Panic.panic(e);
+        }
+        if(!f.canRead() || !f.canWrite()){
+            Panic.panic(new RuntimeException("file cannot read or write!"));
+        }
+        FileChannel fc = null;
+        RandomAccessFile raf = null;
+        try{
+            raf = new RandomAccessFile(f, "rw");
+            fc = raf.getChannel();
+        }catch (FileNotFoundException e){
+            Panic.panic(e);
+        }
+        return new PageCacheImpl(raf, fc, (int)memory / PAGE_SIZE);
+    }
+    public static PageCacheImpl open(String path, long memory){
+        File f = new File(path);
+        if(!f.exists()){
+            Panic.panic(new RuntimeException("file not exists!"));
+        }
+        if(!f.canRead() || !f.canWrite()){
+            Panic.panic(new RuntimeException("file cannot read or write!"));
+        }
+        FileChannel fc = null;
+        RandomAccessFile raf = null;
+        try{
+            raf = new RandomAccessFile(f, "rw");
+            fc = raf.getChannel();
+        }catch (FileNotFoundException e){
+            Panic.panic(e);
+        }
+        return new PageCacheImpl(raf, fc, (int)memory / PAGE_SIZE);
+    }
 }
