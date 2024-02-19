@@ -23,7 +23,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     //最新缓存限制
-    private static int MEM_MIN_LIM = 10;
+    private static final int MEM_MIN_LIM = 10;
+    public static final String DB_SUFFIX = ".db";
     private RandomAccessFile file;
     private FileChannel fc;
     private Lock fileLock;

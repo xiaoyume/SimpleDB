@@ -30,7 +30,7 @@ public class TransactionManagerTest extends TestCase {
 
     @Test
     public void testMultiThread(){
-        tm = TransactionManager.create("D:\\db\\tranmger_test.db");
+        tm = TransactionManager.create("D:/db/tranmger_test");
         transMap = new ConcurrentHashMap<>();
         cdl = new CountDownLatch(noWorkers);
         for(int i = 0; i < noWorkers; i++){

@@ -30,13 +30,14 @@ public class TransactionManager {
     private static final byte FIEDL_TRAN_ABORTED = 2;
     //超级事务,永远处于committed状态
     public static final long SUPER_XID = 0;
+    public static final String XID_SUFFIX = ".xid";
     private RandomAccessFile file;
     private FileChannel fc;
     private long xidCounter;
     private Lock counterLock;
 
     public static TransactionManager create(String path) {
-        File f = new File(path);
+        File f = new File(path + XID_SUFFIX);
         //创建文件
         try {
             if (!f.createNewFile()) {
@@ -70,7 +71,7 @@ public class TransactionManager {
     }
 
     public static TransactionManager open(String path) {
-        File f = new File(path);
+        File f = new File(path + XID_SUFFIX);
         if (!f.exists()) {
             Panic.panic(new RuntimeException("File does not exists!"));
         }

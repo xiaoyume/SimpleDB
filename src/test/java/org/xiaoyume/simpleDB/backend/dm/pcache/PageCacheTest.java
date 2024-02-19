@@ -23,7 +23,7 @@ public class PageCacheTest {
     @Test
     public void testPageCache() throws Exception {
         //50个页面作为缓存
-        PageCache pc = PageCache.create("D:/db/test0.db", PageCache.PAGE_SIZE * 50);
+        PageCache pc = PageCache.create("D:/db/test0", PageCache.PAGE_SIZE * 50);
         //写100个页面
         for(int i = 0; i < 100; i++){
             byte[] tmp = new byte[PageCache.PAGE_SIZE];
@@ -36,7 +36,7 @@ public class PageCacheTest {
         pc.close();
 
         //读100个页面
-        pc = PageCache.open("D:/db/test0.db", PageCache.PAGE_SIZE * 50);
+        pc = PageCache.open("D:/db/test0", PageCache.PAGE_SIZE * 50);
         for(int i = 1; i <= 100; i++){
             Page page = pc.getPage(i);
             assert page.getData()[0] == (byte)(i - 1);
@@ -52,7 +52,7 @@ public class PageCacheTest {
     private AtomicInteger noPages1;
     @Test
     public void testPageCacheMultiSimple() throws Exception {
-        pc1 = PageCache.create("D:/db/pcacher_simple_test1.db", PageCache.PAGE_SIZE * 50);
+        pc1 = PageCache.create("D:/db/pcacher_simple_test1", PageCache.PAGE_SIZE * 50);
         cdl1 = new CountDownLatch(200);
         noPages1 = new AtomicInteger(0);
         for(int i = 0; i < 200; i ++) {
@@ -61,7 +61,7 @@ public class PageCacheTest {
             new Thread(r).start();
         }
         cdl1.await();
-//        assert new File("D:/db/pcacher_simple_test1.db").delete();
+//        assert new File("D:/db/pcacher_simple_test1").delete();
     }
 
     private void worker1(int id) {
@@ -103,7 +103,7 @@ public class PageCacheTest {
     private Lock lockNew;
     @Test
     public void testPageCacheMulti() throws InterruptedException {
-        pc2 = PageCache.create("D:/db/pcacher_multi_test.db", PageCache.PAGE_SIZE * 10);
+        pc2 = PageCache.create("D:/db/pcacher_multi_test", PageCache.PAGE_SIZE * 10);
         mpc = new MockPageCache();
         lockNew = new ReentrantLock();
 

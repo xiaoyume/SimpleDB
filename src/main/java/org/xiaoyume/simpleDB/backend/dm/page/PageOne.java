@@ -4,7 +4,6 @@ import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
 import org.xiaoyume.simpleDB.backend.utils.RandomUtil;
 
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * @author xiaoy

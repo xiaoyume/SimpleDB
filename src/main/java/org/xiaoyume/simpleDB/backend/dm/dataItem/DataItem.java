@@ -7,7 +7,6 @@ import org.xiaoyume.simpleDB.backend.dm.page.Page;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.utils.Types;
 
-import javax.xml.crypto.Data;
 import java.util.Arrays;
 
 /**
@@ -27,6 +26,11 @@ public interface DataItem {
     void unlock();
     void rLock();
     void rUnLock();
+
+    Page page();
+    long getUid();
+    byte[] getOldRaw();
+    SubArray getRaw();
 
     public static byte[] wrapDataItemRaw(byte[] raw){
         byte[] valid = new byte[1];

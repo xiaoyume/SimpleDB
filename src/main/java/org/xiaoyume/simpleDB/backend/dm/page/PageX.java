@@ -18,7 +18,7 @@ public class PageX {
     private static final short OF_FREE = 0;
     private static final short OF_DATA = 2;
     public static final int MAX_FREE_SPACE = PageCache.PAGE_SIZE - OF_DATA;
-    public static byte[] InitRaw(){
+    public static byte[] initRaw(){
         byte[] raw = new byte[PageCache.PAGE_SIZE];
         //开始的空闲位置偏移是2
         setFSO(raw, OF_DATA);
@@ -49,7 +49,7 @@ public class PageX {
     /**
      * 把raw插入到page中，返回插入位置末尾
      */
-    public short insert(Page page, byte[] raw){
+    public static short insert(Page page, byte[] raw){
         page.setDirty(true);
         short offset = getFSO(page.getData());
         System.arraycopy(raw, 0, page.getData(), offset, raw.length);
@@ -66,7 +66,7 @@ public class PageX {
     /**
      * 将raw插入到page中的offset位置，把page的offset设置为打的offset
      */
-    public void recoverInsert(Page page, byte[] raw, short offset){
+    public static void recoverInsert(Page page, byte[] raw, short offset){
         page.setDirty(true);
         System.arraycopy(raw, 0, page.getData(), offset, raw.length);
 
@@ -78,7 +78,7 @@ public class PageX {
     /**
      * 把raw插入到page的offset，并更新(数据量不变，没有改变占用空间大小)
      */
-    public void recoverUpdate(Page page, byte[] raw, short offset){
+    public static void recoverUpdate(Page page, byte[] raw, short offset){
         page.setDirty(true);
         System.arraycopy(raw, 0, page.getData(), offset, raw.length);
     }

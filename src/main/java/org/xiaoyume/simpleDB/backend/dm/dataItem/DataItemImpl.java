@@ -6,7 +6,6 @@ import org.xiaoyume.simpleDB.backend.dm.page.Page;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -92,5 +91,25 @@ public class DataItemImpl implements DataItem{
     @Override
     public void rUnLock() {
         rLock.unlock();
+    }
+
+    @Override
+    public Page page() {
+        return page;
+    }
+
+    @Override
+    public long getUid() {
+        return uid;
+    }
+
+    @Override
+    public byte[] getOldRaw() {
+        return oldRaw;
+    }
+
+    @Override
+    public SubArray getRaw() {
+        return raw;
     }
 }
