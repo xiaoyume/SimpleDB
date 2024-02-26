@@ -118,7 +118,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
 
     /**
-     * 更新数据
+     * 更新数据，写入日志
      * @param xid
      * @param dataItem
      */
