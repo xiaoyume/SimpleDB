@@ -1,4 +1,4 @@
-package org.xiaoyume.simpleDB.backend.dm.pcache;
+package org.xiaoyume.simpleDB.backend.dm.pageCache;
 
 import org.xiaoyume.simpleDB.backend.dm.page.Page;
 import org.xiaoyume.simpleDB.backend.utils.Panic;

@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.dm.page;
 
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.utils.RandomUtil;
 
 import java.util.Arrays;

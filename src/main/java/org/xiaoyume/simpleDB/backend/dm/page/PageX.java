@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.dm.page;
 
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
 
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public class PageX {
         page.setDirty(true);
         short offset = getFSO(page.getData());
         System.arraycopy(raw, 0, page.getData(), offset, raw.length);
-        setFSO(raw, (short) (offset + raw.length));
+        setFSO(page.getData(), (short) (offset + raw.length));
         return offset;
     }
 

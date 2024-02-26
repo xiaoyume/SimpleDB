@@ -9,7 +9,7 @@ import org.xiaoyume.simpleDB.backend.dm.page.PageOne;
 import org.xiaoyume.simpleDB.backend.dm.page.PageX;
 import org.xiaoyume.simpleDB.backend.dm.pageIndex.PageIndex;
 import org.xiaoyume.simpleDB.backend.dm.pageIndex.PageInfo;
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.Types;
@@ -49,6 +49,13 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
         return dataItem;
     }
 
+    /**
+     * 根据事务id和数据，插入数据
+     * @param xid
+     * @param data
+     * @return
+     * @throws Exception
+     */
     @Override
     public long insert(long xid, byte[] data) throws Exception {
         //数据打宝成dataitem格式
@@ -59,10 +66,11 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
 
         PageInfo pageInfo = null;
         for(int i = 0; i < 5; i++){
+            //获取空闲页
             pageInfo = pageIndex.select(raw.length);
             if(pageInfo != null){
                 break;
-            }else{
+            }else{//如果没有找到空闲页面，就新建页面
                 int newPageNo = pc.newPage(PageX.initRaw());
                 //页索引，页号和空闲空间
                 pageIndex.add(newPageNo, PageX.MAX_FREE_SPACE);
@@ -108,6 +116,12 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
         pageOne.release();
         pc.close();
     }
+
+    /**
+     * 更新数据
+     * @param xid
+     * @param dataItem
+     */
     public void logDataItem(long xid, DataItem dataItem){
         byte[] log = Recover.updateLog(xid, dataItem);
         logger.log(log);
@@ -115,11 +129,19 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     public void releaseDataItem(DataItem dataItem){
         super.release(dataItem.getUid());
     }
+
+    /**
+     * uid是pageNO和offset运算的得来得
+     * @param uid
+     * @return
+     * @throws Exception
+     */
     @Override
     protected DataItem getForCache(long uid) throws Exception {
-        short offset = (short)(uid & ((1 << 16) - 1));
+        //uid的低16位就是offset, 与运算提取出低16的1值就是offset
+        short offset = (short)(uid & ((1L << 16) - 1));
         uid >>>= 32;
-        int pageNo = (int)(uid & ((1 << 32) - 1));
+        int pageNo = (int)(uid & ((1L << 32) - 1));
         Page page = null;
         try{
             page = pc.getPage(pageNo);

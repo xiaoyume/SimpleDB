@@ -3,6 +3,7 @@ package org.xiaoyume.simpleDB.backend.common;
 import org.junit.Test;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -15,6 +16,8 @@ import java.util.concurrent.CountDownLatch;
 public class CacheTest {
     private CountDownLatch cdl;
     private MockCache cache;
+
+    static Random random = new SecureRandom();
 
     @Test
     public void testCache(){
@@ -32,7 +35,7 @@ public class CacheTest {
     }
     private void work(){
         for(int i = 0; i < 1000; i++){
-            long uid = new Random(System.nanoTime()).nextInt();
+            long uid = random.nextInt();
             long h = 0;
             try{
                 h = cache.get(uid);

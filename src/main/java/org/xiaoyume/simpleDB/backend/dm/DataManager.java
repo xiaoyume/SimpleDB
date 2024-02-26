@@ -3,7 +3,7 @@ package org.xiaoyume.simpleDB.backend.dm;
 import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItem;
 import org.xiaoyume.simpleDB.backend.dm.logger.Logger;
 import org.xiaoyume.simpleDB.backend.dm.page.PageOne;
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 
 /**

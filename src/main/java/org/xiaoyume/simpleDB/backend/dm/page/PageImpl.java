@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.dm.page;
 
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

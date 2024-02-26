@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 
 import java.io.File;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TransactionManagerTest extends TestCase {
+    static Random random = new SecureRandom();
     //事务数量
     private int transCnt = 0;
     //线程数量
@@ -49,7 +51,7 @@ public class TransactionManagerTest extends TestCase {
         long transXID = 0;
         for(int i = 0; i < noworks; i++){
             //生成一个随机0-5的整数
-            int op = new Random(System.nanoTime()).nextInt(6);
+            int op = random.nextInt(6);
             //如果op = 0
             if(op == 0){
                 lock.lock();
@@ -63,7 +65,7 @@ public class TransactionManagerTest extends TestCase {
 
                 }else{//已经开启了事务
                     //随机一个1，2的数，然后根据这个数来决定是否提交或者回滚
-                    int status = (new Random(System.nanoTime()).nextInt(Integer.MAX_VALUE) % 2) + 1;
+                    int status = (random.nextInt(Integer.MAX_VALUE) % 2) + 1;
                     switch (status){
                         case 1 -> {
                             tm.commit(transXID);
@@ -81,7 +83,7 @@ public class TransactionManagerTest extends TestCase {
                 //随机检查，事务状态一致
                 lock.lock();
                 if(transCnt > 0){
-                    long xid = (long)((new Random(System.nanoTime()).nextInt(Integer.MAX_VALUE) % transCnt) + 1);
+                    long xid = (long)((random.nextInt(Integer.MAX_VALUE) % transCnt) + 1);
                     byte status = transMap.get(xid);
                     boolean ok = false;
                     switch(status){

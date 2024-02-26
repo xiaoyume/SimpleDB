@@ -2,7 +2,7 @@ package org.xiaoyume.simpleDB.backend.dm.pageIndex;
 
 import junit.framework.TestCase;
 import org.junit.Test;
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 
 public class PageIndexTest extends TestCase {
     @Test

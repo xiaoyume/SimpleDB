@@ -1,12 +1,10 @@
-package org.xiaoyume.simpleDB.backend.dm.pcache;
+package org.xiaoyume.simpleDB.backend.dm.pageCache;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
 import org.xiaoyume.simpleDB.backend.dm.page.Page;
 import org.xiaoyume.simpleDB.backend.dm.page.PageImpl;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -22,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2024/2/18 11:04
  */
 public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
-    //最新缓存限制
+    //最小缓存限制
     private static final int MEM_MIN_LIM = 10;
     public static final String DB_SUFFIX = ".db";
     private RandomAccessFile file;

@@ -49,6 +49,9 @@ public class DataItemImpl implements DataItem{
         return new SubArray(raw.raw, raw.start+ OF_DATA, raw.end);
     }
 
+    /**
+     * 保存旧的数据，以便进行回滚操作
+     */
     @Override
     public void before() {
         wLock.lock();
@@ -56,12 +59,19 @@ public class DataItemImpl implements DataItem{
         System.arraycopy(raw.raw, raw.start, oldRaw, 0, oldRaw.length);
     }
 
+    /**
+     * 回滚，把oldraw的数据赋值到raw里
+     */
     @Override
     public void unBefore() {
         System.arraycopy(oldRaw, 0, raw.raw, raw.start, oldRaw.length);
         wLock.unlock();
     }
 
+    /**
+     *
+     * @param xid
+     */
     @Override
     public void after(long xid) {
         dm.logDataItem(xid, this);

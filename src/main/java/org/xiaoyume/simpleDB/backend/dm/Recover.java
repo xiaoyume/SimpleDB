@@ -6,7 +6,7 @@ import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItem;
 import org.xiaoyume.simpleDB.backend.dm.logger.Logger;
 import org.xiaoyume.simpleDB.backend.dm.page.Page;
 import org.xiaoyume.simpleDB.backend.dm.page.PageX;
-import org.xiaoyume.simpleDB.backend.dm.pcache.PageCache;
+import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
@@ -181,9 +181,9 @@ public class Recover {
         UpdateLogInfo updateLogInfo = new UpdateLogInfo();
         updateLogInfo.xid = Parser.parseLong(Arrays.copyOfRange(log, OF_XID, OF_UPDATE_UID));
         long uid = Parser.parseLong(Arrays.copyOfRange(log, OF_UPDATE_UID, OF_UPDATE_RAW));
-        updateLogInfo.offset = (short) (uid & ((1 << 16) - 1));
+        updateLogInfo.offset = (short) (uid & ((1L << 16) - 1));
         uid >>>= 32;
-        updateLogInfo.pageNo = (int) (uid & ((1 << 32) - 1));
+        updateLogInfo.pageNo = (int) (uid & ((1L << 32) - 1));
         //分两半，前面存旧数据，
         int length = (log.length - OF_UPDATE_RAW) / 2;
         updateLogInfo.oldRaw = Arrays.copyOfRange(log, OF_UPDATE_RAW, OF_UPDATE_RAW + length);
