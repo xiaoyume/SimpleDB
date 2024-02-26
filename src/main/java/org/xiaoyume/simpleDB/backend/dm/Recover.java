@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * @author xiaoy
  * @version 1.0
- * @description: TODO
+ * @description: loadcheckpageone，检测第一页的vc数据值，如果vc不通过就会出发recover,redo,undo日志
  * @date 2024/2/19 15:49
  */
 public class Recover {
@@ -27,12 +27,23 @@ public class Recover {
     private static final int REDO = 0;
     private static final int UNDO = 1;
 
+    /**
+     * 插入日志信息,xid,pageno,offset,raw
+     */
     static class InsertLogInfo{
         long xid;
         int pageNo;
         short offset;
         byte[] raw;
     }
+
+    /**
+     * 事务xid,
+     * 页号
+     * 偏移
+     * 旧数据
+     * 新数据
+     */
     static class UpdateLogInfo{
         long xid;
         int pageNo;
@@ -43,6 +54,7 @@ public class Recover {
 
     public static void recover(TransactionManager tm, Logger logger, PageCache pageCache){
         System.out.println("Recovering ...........");
+        //log回指针到第一条日志前
         logger.rewind();
 
         int maxPageNo = 0;
@@ -104,15 +116,24 @@ public class Recover {
         }
     }
 
+    /**
+     * 根据log，undo恢复
+     * @param transactionManager
+     * @param logger
+     * @param pageCache
+     */
     private static void undoTransactions(TransactionManager transactionManager, Logger logger, PageCache pageCache){
         Map<Long, List<byte[]>> logCache = new HashMap<>();
         logger.rewind();
         while(true){
             byte[] log = logger.next();
             if(log == null) break;
+            //只需要对活跃状态的事务操作undo
+            //如果是插入日志
             if(isInsertLog(log)){
                 InsertLogInfo insertLogInfo = parseInsertLog(log);
                 long xid = insertLogInfo.xid;
+                //如果事务还是活跃状态，log缓存起来
                 if(transactionManager.isActive(xid)){
                     if(!logCache.containsKey(xid)){
                         logCache.put(xid, new ArrayList<>());
@@ -134,6 +155,7 @@ public class Recover {
         //对所有的active log进行倒序undo
         for(Entry<Long, List<byte[]>> entry : logCache.entrySet()){
             List<byte[]> logs = entry.getValue();
+            //倒序遍历当前事务的所有日志
             for(int i = logs.size() - 1; i >= 0; i--){
                 byte[] log = logs.get(i);
                 if(isInsertLog(log)){
@@ -263,9 +285,11 @@ public class Recover {
             Panic.panic(e);
         }
         try{
+            //如果是要执行undo，直接将插入日志里的数据置为无效数据
             if(flag == UNDO) {
                 DataItem.setDataItemRawInvalid(insertLogInfo.raw);
             }
+            //覆盖插入
             PageX.recoverInsert(page, insertLogInfo.raw, insertLogInfo.offset);
         }finally {
             page.release();

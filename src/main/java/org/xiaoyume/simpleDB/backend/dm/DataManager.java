@@ -26,6 +26,13 @@ public interface DataManager {
         return dm;
     }
 
+    /**
+     *
+     * @param path
+     * @param mem
+     * @param tm
+     * @return
+     */
     public static DataManager open(String path, long mem, TransactionManager tm){
         PageCache pc = PageCache.open(path, mem);
         Logger lg = Logger.open(path);

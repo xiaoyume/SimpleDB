@@ -6,6 +6,7 @@ import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItem;
 import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.tm.MockTransactionManager;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
+import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.RandomUtil;
 
@@ -47,8 +48,51 @@ public class DataManagerTest {
         Runnable r = () -> worker(dm0, mdm, tasksNum, 50, cdl);
         new Thread(r).run();
         cdl.await();
+        dm0.close();
+        mdm.close();
 //        new File("D:/db/TESTDMSingle.db").delete();
 //        new File("D:/db/TESTDMSingle.log").delete();
+    }
+
+    @Test
+    public void testDMMulti() throws InterruptedException {
+        TransactionManager tm0 = new MockTransactionManager();
+        DataManager dm0 = DataManager.create("D:/db/testDMMulti", PageCache.PAGE_SIZE*10, tm0);
+        DataManager mdm = MockDataManager.newMockDataManager();
+        int tasksNum = 500;
+        CountDownLatch cdl = new CountDownLatch(10);
+        initUids();
+        for(int i = 0; i < 10; i++){
+            Runnable r = () -> worker(dm0, mdm, tasksNum, 50, cdl);
+            new Thread(r).run();
+        }
+        cdl.await();
+        dm0.close();
+        mdm.close();
+
+    }
+
+    @Test
+    public void testRecoverSimple() throws InterruptedException {
+        TransactionManager tm0 = TransactionManager.create("D:/db/testrecover");
+        DataManager dm0 = DataManager.create("D:/db/testrecover", PageCache.PAGE_SIZE*30, tm0);
+        DataManager mdm = MockDataManager.newMockDataManager();
+        dm0.close();
+
+        initUids();
+        int workerNums = 10;
+        for(int i = 0; i < 8; i++){
+            dm0 = DataManager.open("D:/db/testrecover", PageCache.PAGE_SIZE*10, tm0);
+            CountDownLatch cdl = new CountDownLatch(workerNums);
+            for(int k = 0; k < workerNums; k++){
+                final DataManager dm = dm0;
+                Runnable r = () -> worker(dm, mdm, 100, 50, cdl);
+                new Thread(r).run();
+            }
+            cdl.await();
+        }
+        dm0.close();
+        mdm.close();
     }
 
     private void worker(DataManager dm0, DataManager dm1, int tastsNum, int insertRation, CountDownLatch cdl){
