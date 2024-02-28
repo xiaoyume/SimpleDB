@@ -8,11 +8,12 @@ import java.util.Map;
 /**
  * @author xiaoy
  * @version 1.0
- * @description: 对一个事务的抽象
+ * @description: 事务，事务快照
  * @date 2024/2/26 19:58
  */
 public class Transaction {
     public long xid;
+    //事务的隔离级别
     public int level;
     public Map<Long, Boolean> snapshot;
     public Exception err;

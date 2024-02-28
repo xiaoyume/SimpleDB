@@ -11,7 +11,7 @@ import java.util.Arrays;
  * @author xiaoy
  * @version 1.0
  * @description: vm版本控制,向上抽象出entry
- * entry结构
+ * entry结构, mvcc里的readview结构，xmin和xmax表示生成这个entry时活跃的事务id
  * [XMIN][XMAX][data]
  * @date 2024/2/26 19:58
  */
