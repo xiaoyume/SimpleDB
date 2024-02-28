@@ -101,4 +101,8 @@ public class Entry {
             dataItem.after(xid);
         }
     }
+
+    public long getUID(){
+        return uid;
+    }
 }

@@ -1,5 +1,8 @@
 package org.xiaoyume.simpleDB.backend.vm;
 
+import org.xiaoyume.simpleDB.backend.dm.DataManager;
+import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
+
 import javax.swing.text.StyledEditorKit;
 
 /**
@@ -14,5 +17,9 @@ public interface VersionManager {
     boolean delete(long xid, long uid) throws Exception;
     long begin(int level);
     void commit(long xid) throws Exception;
-    void abort(long xid) throws Exception;
+    void abort(long xid);
+
+    public static VersionManager newVersionManager(TransactionManager tm, DataManager dm) {
+        return new VersionManagerImpl(tm, dm);
+    }
 }
