@@ -46,7 +46,7 @@ public class PageOne {
      * @param raw
      */
     private static void setVcClose(byte[] raw){
-        System.arraycopy(RandomUtil.randomBytes(LEN_VC), 0, raw, OF_VC + LEN_VC, LEN_VC);
+        System.arraycopy(raw, OF_VC, raw, OF_VC + LEN_VC, LEN_VC);
     }
     public static boolean checkVc(Page page){
         return check(page.getData());

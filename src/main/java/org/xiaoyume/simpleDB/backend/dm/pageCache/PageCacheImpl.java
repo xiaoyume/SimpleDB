@@ -79,7 +79,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
             fc.position(offset);
             fc.read(buf);
         }catch (IOException e){
-            Panic.panic(new RuntimeException(" "));
+            Panic.panic(e);
         }
         fileLock.unlock();
         return new PageImpl(pageNo, buf.array(), this);

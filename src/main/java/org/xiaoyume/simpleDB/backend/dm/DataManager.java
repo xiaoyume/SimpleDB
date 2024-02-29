@@ -9,7 +9,7 @@ import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 /**
  * @author xiaoy
  * @version 1.0
- * @description: TODO
+ * @description: 控制数据行为，读，写
  * @date 2024/2/18 21:33
  */
 public interface DataManager {

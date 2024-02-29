@@ -43,7 +43,7 @@ public interface DataItem {
     public static DataItem parseDataItem(Page page, short offset, DataManagerImpl dm){
         byte[] raw = page.getData();
         //获取dataitem size
-        short size = Parser.parseShort(Arrays.copyOfRange(raw, DataItemImpl.OF_SIZE+offset, offset+DataItemImpl.OF_DATA));
+        short size = Parser.parseShort(Arrays.copyOfRange(raw, offset + DataItemImpl.OF_SIZE, offset+DataItemImpl.OF_DATA));
         //dataitem占用长度
         short length = (short)(size + DataItemImpl.OF_DATA);
         long uid = Types.addressToUid(page.getPageNumber(), offset);

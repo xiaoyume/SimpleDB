@@ -64,7 +64,7 @@ public class PageX {
         return PageCache.PAGE_SIZE - (int)getFSO(page.getData());
     }
     /**
-     * 将raw插入到page中的offset位置，把page的offset设置为打的offset
+     * 将raw插入到page中的offset位置，把page的offset设置为大的offset
      */
     public static void recoverInsert(Page page, byte[] raw, short offset){
         page.setDirty(true);

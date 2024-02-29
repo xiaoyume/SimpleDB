@@ -67,12 +67,12 @@ public class TransactionManagerTest extends TestCase {
                     //随机一个1，2的数，然后根据这个数来决定是否提交或者回滚
                     int status = (random.nextInt(Integer.MAX_VALUE) % 2) + 1;
                     switch (status){
-                        case 1 -> {
+                        case 1 :
                             tm.commit(transXID);
-                        }
-                        case 2 -> {
+                            break;
+                        case 2 :
                             tm.abort(transXID);
-                        }
+                            break;
                     }
                     //更新状态
                     transMap.put(transXID, (byte)status);
@@ -87,15 +87,16 @@ public class TransactionManagerTest extends TestCase {
                     byte status = transMap.get(xid);
                     boolean ok = false;
                     switch(status){
-                        case 0 -> {
+                        case 0 :
                             ok = tm.isActive(xid);
-                        }
-                        case 1 -> {
+                            break;
+                        case 1 :
                             ok = tm.isCommitted(xid);
-                        }
-                        case 2 -> {
+                            break;
+                        case 2 :
                             ok = tm.isAborted(xid);
-                        }
+                            break;
+
                     }
                     assert ok;
                 }

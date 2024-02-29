@@ -17,7 +17,7 @@ import org.xiaoyume.simpleDB.backend.utils.Types;
 /**
  * @author xiaoy
  * @version 1.0
- * @description: TODO
+ * @description: 关联事务，页缓存，日志，页信息
  * @date 2024/2/18 21:39
  */
 public class DataManagerImpl extends AbstractCache<DataItem> implements DataManager{
