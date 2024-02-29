@@ -1,5 +1,6 @@
 package org.xiaoyume.simpleDB.backend.dm.logger;
 
+import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
@@ -25,13 +26,13 @@ public interface Logger {
         File f = new File(path+LoggerImpl.LOG_SUFFIX);
         try{
             if(!f.createNewFile()){
-                Panic.panic(new RuntimeException("file already exists!"));
+                Panic.panic(Error.FileExistsException);
             }
         }catch (Exception e){
             Panic.panic(e);
         }
         if(!f.canRead() || !f.canWrite()){
-            Panic.panic(new RuntimeException("file can not be read or write!"));
+            Panic.panic(Error.FileCannotRWException);
         }
         FileChannel fc = null;
         RandomAccessFile raf = null;
@@ -55,10 +56,10 @@ public interface Logger {
     public static Logger open(String path){
         File f = new File(path + LoggerImpl.LOG_SUFFIX);
         if(!f.exists()){
-            Panic.panic(new RuntimeException("file doesnot exists!"));
+            Panic.panic(Error.FileNotExistsException);
         }
         if(!f.canRead() || !f.canWrite()){
-            Panic.panic(new RuntimeException("file can not be read or write!"));
+            Panic.panic(Error.FileCannotRWException);
         }
 
         FileChannel fc = null;

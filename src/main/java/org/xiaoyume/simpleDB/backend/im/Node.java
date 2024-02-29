@@ -345,7 +345,7 @@ public class Node {
         int noKeys = getRawNoKeys(raw);
         int kth = 0;
         while(kth < noKeys) {
-            long ik = getRawKthKey(raw, kth);
+            long ik = getRawKthKey(raw, kth);//获取这个位置的key值，找到一个比给定key大的
             if(ik < key) {
                 kth ++;
             } else {

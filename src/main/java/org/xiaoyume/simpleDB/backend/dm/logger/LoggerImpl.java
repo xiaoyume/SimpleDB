@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm.logger;
 
 import com.google.common.primitives.Bytes;
+import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
@@ -64,7 +65,7 @@ public class LoggerImpl implements Logger{
             Panic.panic(e);
         }
         if(size < 4){
-            Panic.panic(new RuntimeException("Bad log file!"));
+            Panic.panic(Error.BadLogFileException);
         }
 
         ByteBuffer raw = ByteBuffer.allocate(4);
@@ -96,7 +97,7 @@ public class LoggerImpl implements Logger{
             xCheck = calChecksum(xCheck, log);
         }
         if(xCheck != xChecksum){
-            Panic.panic(new RuntimeException("bad log file"));
+            Panic.panic(Error.BadLogFileException);
         }
         //从position位置把文件截断
         try{

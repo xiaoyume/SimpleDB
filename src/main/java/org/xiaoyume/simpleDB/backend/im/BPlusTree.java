@@ -163,10 +163,18 @@ public class BPlusTree {
         return uids;
     }
 
+    /**
+     * 插入key和uid
+     * @param key
+     * @param uid
+     * @throws Exception
+     */
     public void insert(long key, long uid) throws Exception {
+        //获得根节点uid
         long rootUid = rootUid();
         InsertRes res = null;
         try {
+            //插入结果，返回新节点和新key
             res = insert(rootUid, uid, key);
         } catch(Exception e) {
             throw e;
@@ -180,7 +188,7 @@ public class BPlusTree {
             }
         }
     }
-
+    //非叶子节点存储的就是新节点uid和key
     class InsertRes {
         long newNode, newKey;
     }

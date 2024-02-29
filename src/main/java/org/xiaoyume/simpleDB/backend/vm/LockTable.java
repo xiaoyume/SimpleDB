@@ -1,5 +1,7 @@
 package org.xiaoyume.simpleDB.backend.vm;
 
+import org.xiaoyume.simpleDB.backend.common.Error;
+
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,7 +61,7 @@ public class LockTable {
                 waitU.remove(xid);
                 //从事务等待列表中移除事务
                 removeFromList(wait, uid, xid);
-                throw new RuntimeException("DeadLock!!");
+                throw Error.DeadlockException;
             }
             //没有死锁，创建一个锁，锁住资源，表示等待资源
             Lock l = new ReentrantLock();

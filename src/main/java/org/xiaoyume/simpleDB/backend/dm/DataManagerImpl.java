@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
+import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItem;
 import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItemImpl;
 import org.xiaoyume.simpleDB.backend.dm.logger.Logger;
@@ -61,7 +62,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
         //数据打宝成dataitem格式
         byte[] raw = DataItem.wrapDataItemRaw(data);
         if(raw.length > PageX.MAX_FREE_SPACE){
-            throw new RuntimeException("data too long");
+            throw Error.DataTooLargeException;
         }
 
         PageInfo pageInfo = null;
@@ -77,7 +78,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
             }
         }
         if(pageInfo == null){
-            throw new RuntimeException("database is busy");
+            throw Error.DatabaseBusyException;
         }
 
         Page pg = null;

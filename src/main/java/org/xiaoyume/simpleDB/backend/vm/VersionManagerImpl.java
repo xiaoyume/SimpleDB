@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.vm;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
+import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.DataManager;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
@@ -102,7 +103,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
                 try{
                     l = lt.add(xid, uid);
                 }catch (Exception e){
-                    t.err = new RuntimeException("concurrent update issue!");
+                    t.err = Error.ConcurrentUpdateException;
                     internAbort(xid, true);
                     t.autoAborted = true;
                     throw t.err;
@@ -116,7 +117,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
             }
 
             if(Visibility.isVersionSkip(tm, t, entry)){
-                t.err = new RuntimeException("concurrent update issue!");
+                t.err = Error.ConcurrentUpdateException;
                 internAbort(xid, true);
                 t.autoAborted = true;
                 throw t.err;
@@ -189,7 +190,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         }
 
         if(entry == null){
-            throw new RuntimeException("null entry");
+            throw Error.NullEntryException;
         }
         return entry;
     }

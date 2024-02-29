@@ -1,5 +1,6 @@
 package org.xiaoyume.simpleDB.backend.dm.pageCache;
 
+import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.page.Page;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
@@ -29,13 +30,13 @@ public interface PageCache {
         File f = new File(path+PageCacheImpl.DB_SUFFIX);
         try{
             if(!f.createNewFile()){
-                Panic.panic(new RuntimeException("file already exists!"));
+                Panic.panic(Error.FileNotExistsException);
             }
         }catch (Exception e){
             Panic.panic(e);
         }
         if(!f.canRead() || !f.canWrite()){
-            Panic.panic(new RuntimeException("file cannot read or write!"));
+            Panic.panic(Error.FileCannotRWException);
         }
         FileChannel fc = null;
         RandomAccessFile raf = null;
@@ -50,10 +51,10 @@ public interface PageCache {
     public static PageCacheImpl open(String path, long memory){
         File f = new File(path+PageCacheImpl.DB_SUFFIX);
         if(!f.exists()){
-            Panic.panic(new RuntimeException("file not exists!"));
+            Panic.panic(Error.FileExistsException);
         }
         if(!f.canRead() || !f.canWrite()){
-            Panic.panic(new RuntimeException("file cannot read or write!"));
+            Panic.panic(Error.FileCannotRWException);
         }
         FileChannel fc = null;
         RandomAccessFile raf = null;

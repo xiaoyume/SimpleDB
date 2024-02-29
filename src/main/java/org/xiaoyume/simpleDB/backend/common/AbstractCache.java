@@ -67,7 +67,7 @@ public abstract class AbstractCache<T> {
             //资源不在缓存中，正在请求资源，直接终端循环，需要读取资源
             if(maxResource > 0 && count >= maxResource){
                 lock.unlock();
-                throw new RuntimeException("cache is full!");
+                throw Error.CacheFullException;
             }
             count ++;
             getting.put(key, true);

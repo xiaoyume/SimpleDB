@@ -1,5 +1,6 @@
 package org.xiaoyume.simpleDB.backend.tm;
 
+import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
 
@@ -54,10 +55,10 @@ public class TransactionManagerImpl implements TransactionManager{
         try {
             fileLen = file.length();
         } catch (IOException e) {
-            Panic.panic(new RuntimeException("invalid xid file"));
+            Panic.panic(Error.BadXIDFileException);
         }
         if (fileLen < LEN_XID_HEADER_LENGTH) {
-            Panic.panic(new RuntimeException("invaild xid file!"));
+            Panic.panic(Error.BadXIDFileException);
         }
 
         ByteBuffer buf = ByteBuffer.allocate(LEN_XID_HEADER_LENGTH);
@@ -70,7 +71,7 @@ public class TransactionManagerImpl implements TransactionManager{
         this.xidCounter = Parser.parseLong(buf.array());
         long end = getXidPosition(this.xidCounter + 1);
         if (end != fileLen) {
-            Panic.panic(new RuntimeException("invalid xid file!"));
+            Panic.panic(Error.BadXIDFileException);
         }
     }
 
