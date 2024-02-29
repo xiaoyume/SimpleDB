@@ -190,12 +190,7 @@ public class Node {
      * @throws Exception
      */
     static Node loadNode(BPlusTree bTree, long uid) throws Exception {
-        DataItem di = null;
-        try {
-            di = bTree.dm.read(uid);//获取根节点的dataitem
-        } catch(Exception e) {
-            throw e;
-        }
+        DataItem di = bTree.dm.read(uid);//获取根节点的dataitem
         assert di != null;
         Node n = new Node();//创建一个新节点
         n.tree = bTree;
@@ -386,12 +381,7 @@ public class Node {
         setRawNoKeys(nodeRaw, BALANCE_NUMBER);
         setRawSibling(nodeRaw, getRawSibling(raw));
         copyRawFromKth(raw, nodeRaw, BALANCE_NUMBER);
-        long son = 0;
-        try {
-            son = tree.dm.insert(TransactionManagerImpl.SUPER_XID, nodeRaw.raw);
-        } catch(Exception e) {
-            throw e;
-        }
+        long son = tree.dm.insert(TransactionManagerImpl.SUPER_XID, nodeRaw.raw);
         setRawNoKeys(raw, BALANCE_NUMBER);
         setRawSibling(raw, son);
 

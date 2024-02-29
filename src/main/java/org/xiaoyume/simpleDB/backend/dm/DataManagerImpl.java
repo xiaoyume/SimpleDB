@@ -37,12 +37,8 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
     @Override
     public DataItem read(long uid) throws Exception {
-        DataItemImpl dataItem = null;
-        try{
-            dataItem = (DataItemImpl) super.get(uid);
-        }catch (Exception e){
-            throw e;
-        }
+        DataItemImpl dataItem = (DataItemImpl) super.get(uid);
+
         if(!dataItem.isValid()){
             dataItem.release();
             return null;
@@ -84,11 +80,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
         Page pg = null;
         int freeSpace = 0;
         try{
-            try{
-                pg = pc.getPage(pageInfo.pageNo);
-            }catch (Exception e){
-                throw e;
-            }
+            pg = pc.getPage(pageInfo.pageNo);
 
             byte[] log = Recover.insertLog(xid, pg, raw);
             logger.log(log);
@@ -143,12 +135,8 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
         short offset = (short)(uid & ((1L << 16) - 1));
         uid >>>= 32;
         int pageNo = (int)(uid & ((1L << 32) - 1));
-        Page page = null;
-        try{
-            page = pc.getPage(pageNo);
-        }catch (Exception e){
-            throw e;
-        }
+        Page page = pc.getPage(pageNo);;
+
         return DataItem.parseDataItem(page, offset, this);
     }
 

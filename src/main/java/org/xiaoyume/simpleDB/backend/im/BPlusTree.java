@@ -32,29 +32,13 @@ public class BPlusTree {
     public static long create(DataManager dm) throws Exception {
         //创建一个根节点
         byte[] rawRoot = Node.newNilRootRaw();
-        long rootUid = 0;
-        try {
-            //插入根节点
-            rootUid = dm.insert(TransactionManagerImpl.SUPER_XID, rawRoot);
-        } catch(Exception e) {
-            throw e;
-        }
-        long bootUid = 0;
-        try {
-            bootUid = dm.insert(TransactionManagerImpl.SUPER_XID, Parser.long2Byte(rootUid));
-        } catch(Exception e) {
-            throw e;
-        }
-        return bootUid;
+        long rootUid = dm.insert(TransactionManagerImpl.SUPER_XID, rawRoot);;
+
+        return dm.insert(TransactionManagerImpl.SUPER_XID, Parser.long2Byte(rootUid));
     }
 
     public static BPlusTree load(long bootUid, DataManager dm) throws Exception {
-        DataItem bootDataItem = null;
-        try {
-            bootDataItem = dm.read(bootUid);
-        } catch(Exception e) {
-            throw e;
-        }
+        DataItem bootDataItem = dm.read(bootUid);
         assert bootDataItem != null;
         BPlusTree t = new BPlusTree();
         t.bootUid = bootUid;
@@ -78,12 +62,8 @@ public class BPlusTree {
         bootLock.lock();
         try {
             byte[] rootRaw = Node.newRootRaw(left, right, rightKey);
-            long newRootUid = 0;
-            try {
-                newRootUid = dm.insert(TransactionManagerImpl.SUPER_XID, rootRaw);
-            } catch(Exception e) {
-                throw e;
-            }
+            long newRootUid = dm.insert(TransactionManagerImpl.SUPER_XID, rootRaw);
+
             bootDataItem.before();
             SubArray diRaw = bootDataItem.data();
             System.arraycopy(Parser.long2Byte(newRootUid), 0, diRaw.raw, diRaw.start, 8);
@@ -94,36 +74,21 @@ public class BPlusTree {
     }
 
     private long searchLeaf(long nodeUid, long key) throws Exception {
-        Node node = null;
-        try {
-            node = Node.loadNode(this, nodeUid);
-        } catch(Exception e) {
-            throw e;
-        }
+        Node node = node = Node.loadNode(this, nodeUid);
         boolean isLeaf = node.isLeaf();
         node.release();
 
         if(isLeaf) {
             return nodeUid;
         } else {
-            long next = 0;
-            try {
-                next = searchNext(nodeUid, key);
-            } catch(Exception e) {
-                throw e;
-            }
+            long next = searchNext(nodeUid, key);
             return searchLeaf(next, key);
         }
     }
 
     private long searchNext(long nodeUid, long key) throws Exception {
         while(true) {
-            Node node = null;
-            try {
-                node = Node.loadNode(this, nodeUid);
-            } catch(Exception e) {
-                throw e;
-            }
+            Node node = Node.loadNode(this, nodeUid);
             SearchNextRes res = node.searchNext(key);
             node.release();
             if(res.uid != 0) return res.uid;
@@ -137,20 +102,10 @@ public class BPlusTree {
 
     private List<Long> searchRange(long leftKey, long rightKey) throws Exception {
         long rootUid = rootUid();
-        long leafUid = 0;
-        try {
-            leafUid = searchLeaf(rootUid, leftKey);
-        } catch(Exception e) {
-            throw e;
-        }
+        long leafUid = searchLeaf(rootUid, leftKey);
         List<Long> uids = new ArrayList<>();
         while(true) {
-            Node leaf = null;
-            try {
-                leaf = Node.loadNode(this, leafUid);
-            } catch(Exception e) {
-                throw e;
-            }
+            Node leaf = Node.loadNode(this, leafUid);
             LeafSearchRangeRes res = leaf.leafSearchRange(leftKey, rightKey);
             leaf.release();
             uids.addAll(res.uids);
@@ -172,20 +127,10 @@ public class BPlusTree {
     public void insert(long key, long uid) throws Exception {
         //获得根节点uid
         long rootUid = rootUid();
-        InsertRes res = null;
-        try {
-            //插入结果，返回新节点和新key
-            res = insert(rootUid, uid, key);
-        } catch(Exception e) {
-            throw e;
-        }
+        InsertRes res = insert(rootUid, uid, key);//插入结果，返回新节点和新key
         assert res != null;
         if(res.newNode != 0) {
-            try {
-                updateRootUid(rootUid, res.newNode, res.newKey);
-            } catch(Exception e) {
-                throw e;
-            }
+            updateRootUid(rootUid, res.newNode, res.newKey);
         }
     }
     //非叶子节点存储的就是新节点uid和key
@@ -194,43 +139,18 @@ public class BPlusTree {
     }
 
     private InsertRes insert(long nodeUid, long uid, long key) throws Exception {
-        Node node = null;
-        try {
-            node = Node.loadNode(this, nodeUid);//加载根节点
-        } catch(Exception e) {
-            throw e;
-        }
+        Node node = Node.loadNode(this, nodeUid);//加载根节点
         boolean isLeaf = node.isLeaf();
         node.release();//释放根节点
 
         InsertRes res = null;
         if(isLeaf) {
-            try {
-                res = insertAndSplit(nodeUid, uid, key);
-            } catch(Exception e) {
-                throw e;
-            }
-            assert res != null;
+            res = insertAndSplit(nodeUid, uid, key);
         } else {
-            long next = 0;
-            try {
-                next = searchNext(nodeUid, key);
-            } catch(Exception e) {
-                throw e;
-            }
-
-            InsertRes ir = null;
-            try {
-                ir = insert(next, uid, key);
-            } catch(Exception e) {
-                throw e;
-            }
+            long next = searchNext(nodeUid, key);
+            InsertRes ir = insert(next, uid, key);
             if(ir.newNode != 0) {
-                try {
-                    res = insertAndSplit(nodeUid, ir.newNode, ir.newKey);
-                } catch(Exception e) {
-                    throw e;
-                }
+                res = insertAndSplit(nodeUid, ir.newNode, ir.newKey);
             } else {
                 res = new InsertRes();
             }
@@ -241,18 +161,8 @@ public class BPlusTree {
 
     private InsertRes insertAndSplit(long nodeUid, long uid, long key) throws Exception {
         while(true) {
-            Node node = null;
-            try {
-                node = Node.loadNode(this, nodeUid);
-            } catch(Exception e) {
-                throw e;
-            }
-            InsertAndSplitRes iasr = null;
-            try {
-                iasr = node.insertAndSplit(uid, key);
-            } catch(Exception e) {
-                throw e;
-            }
+            Node node = Node.loadNode(this, nodeUid);;
+            InsertAndSplitRes iasr = node.insertAndSplit(uid, key);
             node.release();
             if(iasr.siblingUid != 0) {
                 nodeUid = iasr.siblingUid;
