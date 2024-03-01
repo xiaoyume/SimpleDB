@@ -26,9 +26,9 @@ public class Field {
     //字段所属表
     private Table tb;
     //字段名
-    private String fieldName;
+    String fieldName;
     //字段类型 可以是 "int32"、"int64" 或 "string"。
-    private String fieldType;
+    String fieldType;
     //字段索引
     private long index;
     private BPlusTree bt;
@@ -151,6 +151,20 @@ public class Field {
 
     public List<Long> search(long left, long right) throws Exception {
         return bt.searchRange(left, right);
+    }
+    /**
+     * 根据字段类型，将字符串转换为对应的值
+     */
+    public Object string2Value(String str){
+        switch(fieldType) {
+            case "int32":
+                return Integer.parseInt(str);
+            case "int64":
+                return Long.parseLong(str);
+            case "string":
+                return str;
+        }
+        return null;
     }
 
     /**

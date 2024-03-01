@@ -1,7 +1,8 @@
 package org.xiaoyume.simpleDB.backend.tbm;
 
 import com.google.common.primitives.Bytes;
-import org.xiaoyume.simpleDB.backend.parser.statement.Create;
+import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.backend.parser.statement.*;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
 import org.xiaoyume.simpleDB.backend.utils.ParseStringRes;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
@@ -9,6 +10,7 @@ import org.xiaoyume.simpleDB.backend.utils.Parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author xiaoy
@@ -80,6 +82,11 @@ public class Table {
         this.nextUid = nextUid;
     }
 
+    /**
+     * 解析成表
+     * @param raw
+     * @return
+     */
     private Table parseSelf(byte[] raw) {
         int position = 0;
         ParseStringRes res = Parser.parseString(raw);
@@ -114,6 +121,120 @@ public class Table {
         return this;
     }
 
+    /**
+     *
+     * @param xid
+     * @param delete
+     * @return
+     * @throws Exception
+     */
+    public int delete(long xid, Delete delete) throws Exception {
+        List<Long> uids = parseWhere(delete.where);
+        int count = 0;
+        for (Long uid : uids) {
+            if(((TableManagerImpl)tbm).vm.delete(xid, uid)) {
+                count ++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 用于更新表中符合指定条件的数据
+     * @param xid
+     * @param update
+     * @return
+     * @throws Exception
+     */
+    public int Update(long xid, Update update) throws Exception {
+        //要更新的uid
+        List<Long> uids = parseWhere(update.where);
+        Field fd = null;
+        //遍历查找字段
+        for (Field f : fields) {
+            if(f.fieldName.equals(update.fieldName)) {
+                fd = f;
+                break;
+            }
+        }
+        if(fd == null) {
+            throw Error.FieldNotFoundException;
+        }
+        Object value = fd.string2Value(update.value);
+        int count = 0;
+        for (Long uid : uids) {
+            byte[] raw = ((TableManagerImpl)tbm).vm.read(xid, uid);
+            if(raw == null) continue;
+            //删除
+            ((TableManagerImpl)tbm).vm.delete(xid, uid);
+            //解析键值对，更新value
+            Map<String, Object> entry = parseEntry(raw);
+            entry.put(fd.fieldName, value);
+            //还原为raw
+            raw = entry2Raw(entry);
+            //插入
+            long uuid = ((TableManagerImpl)tbm).vm.insert(xid, raw);
+
+            count ++;
+            //更新索引
+            for (Field field : fields) {
+                if(field.isIndexed()) {
+                    field.insert(entry.get(field.fieldName), uuid);
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 读取表中符合指定条件的数据
+     * @param xid
+     * @param read
+     * @return
+     * @throws Exception
+     */
+    public String read(long xid, Read read) throws Exception {
+        List<Long> uids = parseWhere(read.where);
+        StringBuilder sb = new StringBuilder();
+        for (Long uid : uids) {
+            byte[] raw = ((TableManagerImpl)tbm).vm.read(xid, uid);
+            if(raw == null) continue;
+            Map<String, Object> entry = parseEntry(raw);
+            sb.append(printEntry(entry)).append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 解析删除更新读取操作的条件
+     * @param where
+     * @return
+     * @throws Exception
+     */
+    private List<Long> parseWhere(Where where) throws Exception {
+        return null;
+    }
+
+    private String printEntry(Map<String, Object> entry) {
+        return null;
+    }
+
+    private Map<String, Object> parseEntry(byte[] raw) {
+        return null;
+    }
+
+    /**
+     * 取出字段的值，打包成字节数组
+     * @param entry 字段名，数据
+     * @return
+     */
+    private byte[] entry2Raw(Map<String, Object> entry) {
+        byte[] raw = new byte[0];
+        for (Field field : fields) {
+            raw = Bytes.concat(raw, field.value2Raw(entry.get(field.fieldName)));
+        }
+        return raw;
+    }
 
 
     @Override
