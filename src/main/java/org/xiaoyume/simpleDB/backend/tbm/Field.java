@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class Field {
     //字段唯一标识符
-    private long uid;
+    long uid;
     //字段所属表
     private Table tb;
     //字段名

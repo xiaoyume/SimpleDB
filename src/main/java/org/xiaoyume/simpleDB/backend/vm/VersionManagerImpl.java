@@ -33,6 +33,14 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         this.lock = new ReentrantLock();
         this.lt = new LockTable();
     }
+
+    /**
+     *
+     * @param xid
+     * @param uid
+     * @return
+     * @throws Exception
+     */
     @Override
     public byte[] read(long xid, long uid) throws Exception {
         lock.lock();
