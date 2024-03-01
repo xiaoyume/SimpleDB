@@ -26,4 +26,7 @@ public class Error {
     public static final Exception DeadlockException = new RuntimeException("Deadlock!");
     public static final Exception ConcurrentUpdateException = new RuntimeException("Concurrent update issue!");//并发更新异常
     public static final Exception NullEntryException = new RuntimeException("Null entry!");
+
+    //tbm
+    public static final Exception InvalidFieldException = new RuntimeException("Invalid field type!");
 }

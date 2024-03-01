@@ -100,7 +100,14 @@ public class BPlusTree {
         return searchRange(key, key);
     }
 
-    private List<Long> searchRange(long leftKey, long rightKey) throws Exception {
+    /**
+     * 范围查找
+     * @param leftKey
+     * @param rightKey
+     * @return
+     * @throws Exception
+     */
+    public List<Long> searchRange(long leftKey, long rightKey) throws Exception {
         long rootUid = rootUid();
         long leafUid = searchLeaf(rootUid, leftKey);
         List<Long> uids = new ArrayList<>();
