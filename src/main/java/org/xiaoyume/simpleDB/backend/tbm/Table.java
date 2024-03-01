@@ -6,11 +6,9 @@ import org.xiaoyume.simpleDB.backend.parser.statement.*;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
 import org.xiaoyume.simpleDB.backend.utils.ParseStringRes;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
+import org.xiaoyume.simpleDB.backend.tbm.Field.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xiaoy
@@ -146,7 +144,7 @@ public class Table {
      * @return
      * @throws Exception
      */
-    public int Update(long xid, Update update) throws Exception {
+    public int update(long xid, Update update) throws Exception {
         //要更新的uid
         List<Long> uids = parseWhere(update.where);
         Field fd = null;
@@ -206,21 +204,172 @@ public class Table {
     }
 
     /**
+     * 向表中插入数据
+     * @param xid
+     * @param insert
+     * @throws Exception
+     */
+    public void insert(long xid, Insert insert) throws Exception {
+        Map<String, Object> entry = string2Entry(insert.values);
+        byte[] raw = entry2Raw(entry);
+        //插入并得到数据uid
+        long uid = ((TableManagerImpl)tbm).vm.insert(xid, raw);
+        for (Field field : fields) {
+            if(field.isIndexed()) {
+                //插到b+树索引里
+                field.insert(entry.get(field.fieldName), uid);
+            }
+        }
+    }
+
+    /**
+     * values数组转成键值对，values插入的值和字段的顺序一致， 一一对应
+     * @return
+     * @throws Exception
+     */
+    private Map<String, Object> string2Entry(String[] values) throws Exception {
+        if(values.length != fields.size()) {
+            throw Error.InvalidValuesException;
+        }
+        Map<String, Object> entry = new HashMap<>();
+        for (int i = 0; i < fields.size(); i++) {
+            Field f = fields.get(i);
+            Object v = f.string2Value(values[i]);
+            entry.put(f.fieldName, v);
+        }
+        return entry;
+    }
+
+    /**
      * 解析删除更新读取操作的条件
      * @param where
      * @return
      * @throws Exception
      */
     private List<Long> parseWhere(Where where) throws Exception {
-        return null;
+        //查询条件边界值
+        long l0=0, r0=0, l1=0, r1=0;
+        boolean single = false;
+        Field fd = null;
+        //where为空，表示没有明确的查询条件
+        if(where == null) {
+            //遍历表中所有字段，如果某个字段有索引，作为查询条件字段
+            for (Field field : fields) {
+                if(field.isIndexed()) {
+                    fd = field;
+                    break;
+                }
+            }
+            //左右边界设置为最大
+            l0 = 0;
+            r0 = Long.MAX_VALUE;
+            single = true;
+        } else {
+            //where不空，遍历找到查询条件匹配的字段
+            for (Field field : fields) {
+                if(field.fieldName.equals(where.singleExp1.field)) {
+                    if(!field.isIndexed()) {
+                        throw Error.FieldNotIndexedException;
+                    }
+                    fd = field;
+                    break;
+                }
+            }
+            if(fd == null) {
+                throw Error.FieldNotFoundException;
+            }
+            //计算左右边界
+            CalWhereRes res = calWhere(fd, where);
+            l0 = res.l0; r0 = res.r0;
+            l1 = res.l1; r1 = res.r1;
+            single = res.single;
+        }
+        //字段范围查找，b+树查找
+        List<Long> uids = fd.search(l0, r0);
+        if(!single) {
+            List<Long> tmp = fd.search(l1, r1);
+            uids.addAll(tmp);
+        }
+        return uids;
     }
 
+    class CalWhereRes {
+        long l0, r0, l1, r1;
+        boolean single;
+    }
+
+    /**
+     * 根据字段（b+树索引）和查询条件计算出对应的边界值
+     * @param fd
+     * @param where
+     * @return
+     * @throws Exception
+     */
+    private CalWhereRes calWhere(Field fd, Where where) throws Exception {
+        CalWhereRes res = new CalWhereRes();
+        switch(where.logicOp) {
+            case ""://空, 单一条件， 就只比较 第一个表达式
+                res.single = true;
+                FieldCalRes r = fd.calExp(where.singleExp1);
+                res.l0 = r.left; res.r0 = r.right;
+                break;
+            case "or"://or, 两个表达式都满足
+                res.single = false;
+                r = fd.calExp(where.singleExp1);
+                res.l0 = r.left; res.r0 = r.right;
+                r = fd.calExp(where.singleExp2);
+                res.l1 = r.left; res.r1 = r.right;
+                break;
+            case "and"://and可以合并为单个查询,lo,ro表示边界     < 10 and > 5  (0,10)(5,max)->(5,10)
+                res.single = true;
+                r = fd.calExp(where.singleExp1);
+                res.l0 = r.left; res.r0 = r.right;
+                r = fd.calExp(where.singleExp2);
+                res.l1 = r.left; res.r1 = r.right;
+                if(res.l1 > res.l0) res.l0 = res.l1;
+                if(res.r1 < res.r0) res.r0 = res.r1;
+                break;
+            default:
+                throw Error.InvalidLogOpException;
+        }
+        return res;
+    }
+
+    /**
+     *
+     * @param entry 字段名 -> 数据
+     * @return
+     */
     private String printEntry(Map<String, Object> entry) {
-        return null;
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < fields.size(); i++) {
+            //取字段
+            Field field = fields.get(i);
+            //取字段对应的值
+            sb.append(field.printValue(entry.get(field.fieldName)));
+            if(i == fields.size()-1) {
+                sb.append("]");
+            } else {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
 
+    /**
+     * 字节数据解析出字段，数据的映射
+     * @param raw
+     * @return
+     */
     private Map<String, Object> parseEntry(byte[] raw) {
-        return null;
+        int pos = 0;
+        Map<String, Object> entry = new HashMap<>();
+        for (Field field : fields) {
+            ParseValueRes r = field.parserValue(Arrays.copyOf(raw, pos));
+            entry.put(field.fieldName, r.v);
+            pos += r.shift;
+        }
+        return entry;
     }
 
     /**

@@ -3,6 +3,7 @@ package org.xiaoyume.simpleDB.backend.tbm;
 import com.google.common.primitives.Bytes;
 import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.im.BPlusTree;
+import org.xiaoyume.simpleDB.backend.parser.statement.SingleExpression;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.ParseStringRes;
@@ -138,7 +139,7 @@ public class Field {
     }
 
     /**
-     * 向字段中插入键值对
+     * b+树索引中插入键值对
      * @param key
      * @param uid
      * @throws Exception
@@ -208,7 +209,7 @@ public class Field {
     }
 
     /**
-     *
+     *解析字段对应的value,如果是int32类型就取4个字节
      * @param raw
      * @return
      */
@@ -257,5 +258,39 @@ public class Field {
                 .append(index!=0?", Index":", NoIndex")
                 .append(")")
                 .toString();
+    }
+
+    /**
+     * 计算单个表达式，返回计算结果
+     * @param exp
+     * @return
+     * @throws Exception
+     */
+    public FieldCalRes calExp(SingleExpression exp) throws Exception {
+        Object v = null;
+        FieldCalRes res = new FieldCalRes();
+        switch(exp.compareOp) {
+            case "<":
+                //右边界为表达式值对应的唯一标识符减 1。
+                res.left = 0;
+                v = string2Value(exp.value);
+                res.right = value2Uid(v);
+                if(res.right > 0) {
+                    res.right --;
+                }
+                break;
+            case "=":
+                v = string2Value(exp.value);
+                res.left = value2Uid(v);
+                res.right = res.left;
+                break;
+            case ">":
+                //左边界设为表达式值对应的唯一标识符加 1，右边界设为long的最大值
+                res.right = Long.MAX_VALUE;
+                v = string2Value(exp.value);
+                res.left = value2Uid(v) + 1;
+                break;
+        }
+        return res;
     }
 }
