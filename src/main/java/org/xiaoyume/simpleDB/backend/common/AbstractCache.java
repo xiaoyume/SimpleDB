@@ -1,5 +1,7 @@
 package org.xiaoyume.simpleDB.backend.common;
 
+import org.xiaoyume.simpleDB.common.Error;
+
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;

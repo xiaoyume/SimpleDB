@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.tm;
 
 
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 
 import java.io.File;

@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm.pageCache;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.page.Page;
 import org.xiaoyume.simpleDB.backend.dm.page.PageImpl;
 import org.xiaoyume.simpleDB.backend.utils.Panic;

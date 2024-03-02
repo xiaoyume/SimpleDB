@@ -2,6 +2,7 @@ package org.xiaoyume.simpleDB.backend.common;
 
 import org.junit.Test;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
+import org.xiaoyume.simpleDB.common.Error;
 
 import java.security.SecureRandom;
 import java.util.Random;

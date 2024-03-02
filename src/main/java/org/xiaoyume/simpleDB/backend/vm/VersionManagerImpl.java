@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.vm;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.DataManager;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;

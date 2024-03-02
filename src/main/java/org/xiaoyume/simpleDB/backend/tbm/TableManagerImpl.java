@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.tbm;
 
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.DataManager;
 import org.xiaoyume.simpleDB.backend.parser.statement.*;
 import org.xiaoyume.simpleDB.backend.utils.Parser;

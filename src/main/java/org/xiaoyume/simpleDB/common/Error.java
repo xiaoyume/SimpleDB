@@ -1,4 +1,4 @@
-package org.xiaoyume.simpleDB.backend.common;
+package org.xiaoyume.simpleDB.common;
 
 /**
  * @author xiaoy
@@ -39,4 +39,7 @@ public class Error {
     // sql parser
     public static final Exception InvalidCommandException = new RuntimeException("Invalid command!");
     public static final Exception TableNoIndexException = new RuntimeException("Table has no index!");
+
+    // transport
+    public static final Exception InvalidPkgDataException = new RuntimeException("Invalid package data!");
 }

@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.tbm;
 
 import com.google.common.primitives.Bytes;
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.im.BPlusTree;
 import org.xiaoyume.simpleDB.backend.parser.statement.SingleExpression;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;

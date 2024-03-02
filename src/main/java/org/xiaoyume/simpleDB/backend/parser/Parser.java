@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.parser;
 
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.parser.statement.*;
 
 import java.util.ArrayList;

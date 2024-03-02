@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.dm;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItem;
 import org.xiaoyume.simpleDB.backend.dm.dataItem.DataItemImpl;
 import org.xiaoyume.simpleDB.backend.dm.logger.Logger;

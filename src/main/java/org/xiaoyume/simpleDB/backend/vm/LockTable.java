@@ -1,6 +1,6 @@
 package org.xiaoyume.simpleDB.backend.vm;
 
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;

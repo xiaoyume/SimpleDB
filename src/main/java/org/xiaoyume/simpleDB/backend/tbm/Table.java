@@ -1,7 +1,7 @@
 package org.xiaoyume.simpleDB.backend.tbm;
 
 import com.google.common.primitives.Bytes;
-import org.xiaoyume.simpleDB.backend.common.Error;
+import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.parser.statement.*;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
@@ -372,7 +372,7 @@ public class Table {
         int pos = 0;
         Map<String, Object> entry = new HashMap<>();
         for (Field field : fields) {
-            ParseValueRes r = field.parserValue(Arrays.copyOf(raw, pos));
+            ParseValueRes r = field.parserValue(Arrays.copyOfRange(raw, pos, raw.length));
             entry.put(field.fieldName, r.v);
             pos += r.shift;
         }
