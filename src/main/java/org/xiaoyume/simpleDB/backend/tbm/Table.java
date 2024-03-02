@@ -4,6 +4,7 @@ import com.google.common.primitives.Bytes;
 import org.xiaoyume.simpleDB.backend.common.Error;
 import org.xiaoyume.simpleDB.backend.parser.statement.*;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManagerImpl;
+import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.ParseStringRes;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
 import org.xiaoyume.simpleDB.backend.tbm.Field.*;
@@ -34,8 +35,14 @@ public class Table {
      * @return
      * @throws Exception
      */
-    public static Table loadTable(TableManager tbm, long uid) throws Exception {
-        byte[] raw = ((TableManagerImpl)tbm).vm.read(TransactionManagerImpl.SUPER_XID, uid);
+    public static Table loadTable(TableManager tbm, long uid){
+        byte[] raw = null;
+        try{
+            raw = ((TableManagerImpl)tbm).vm.read(TransactionManagerImpl.SUPER_XID, uid);
+        }catch (Exception e){
+            Panic.panic(e);
+        }
+
         assert raw != null;
         Table tb = new Table(tbm, uid);
         return tb.parseSelf(raw);
