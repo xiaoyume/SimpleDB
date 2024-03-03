@@ -1,6 +1,7 @@
 package org.xiaoyume.simpleDB.backend.vm;
 
 import org.xiaoyume.simpleDB.backend.common.AbstractCache;
+import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.common.Error;
 import org.xiaoyume.simpleDB.backend.dm.DataManager;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
@@ -156,10 +157,16 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         lock.lock();
         Transaction t = activeTransaction.get(xid);
         lock.unlock();
-
-        if(t.err != null){
-            throw t.err;
+        try{
+            if(t.err != null){
+                throw t.err;
+            }
+        }catch (NullPointerException e){
+            System.out.println(xid);
+            System.out.println(activeTransaction.keySet());
+            Panic.panic(e);
         }
+
         lock.lock();
         activeTransaction.remove(xid);
         lock.unlock();

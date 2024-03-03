@@ -42,4 +42,11 @@ public class Error {
 
     // transport
     public static final Exception InvalidPkgDataException = new RuntimeException("Invalid package data!");
+
+    // server
+    public static final Exception NestedTransactionException = new RuntimeException("Nested transaction not supported!");
+    public static final Exception NoTransactionException = new RuntimeException("Not in transaction!");
+
+    //launcher
+    public static final Exception InvalidMemException = new RuntimeException("Invalid memory!");
 }

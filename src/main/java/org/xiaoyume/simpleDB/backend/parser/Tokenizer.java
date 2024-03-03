@@ -138,7 +138,7 @@ public class Tokenizer {
     }
 
     /**
-     *
+     *获取下一个
      * @return
      * @throws Exception
      */
@@ -147,7 +147,7 @@ public class Tokenizer {
         while(true) {
             Byte b = peekByte();
             //为空，或者不是字母或者数字
-            if(b == null || !(isAlphaBeta(b) || isDigit(b))) {
+            if(b == null || !(isAlphaBeta(b) || isDigit(b) || b == '_')) {
                 //是空格
                 if(b != null && isBlank(b)) {
                     popByte();
