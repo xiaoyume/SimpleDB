@@ -11,19 +11,21 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description: TODO
  * @date 2024/2/18 11:01
  */
-public class PageImpl implements Page{
+public class PageImpl implements Page {
 
     private int pageNo;
     private byte[] data;
     private boolean dirty;
     private Lock lock;
     private PageCache pc;
+
     public PageImpl(int pageNo, byte[] data, PageCache pc) {
         this.pageNo = pageNo;
         this.data = data;
         this.pc = pc;
         lock = new ReentrantLock();
     }
+
     @Override
     public void lock() {
         lock.lock();

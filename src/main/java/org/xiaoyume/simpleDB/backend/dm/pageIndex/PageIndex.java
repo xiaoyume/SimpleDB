@@ -24,10 +24,10 @@ public class PageIndex {
     private Lock lock;
     private List<PageInfo>[] lists;
 
-    public PageIndex(){
+    public PageIndex() {
         lock = new ReentrantLock();
         lists = new List[INTERVALS_NO + 1];
-        for(int i = 0; i < INTERVALS_NO + 1; i++){
+        for (int i = 0; i < INTERVALS_NO + 1; i++) {
             lists[i] = new ArrayList<>();
         }
     }
@@ -35,40 +35,42 @@ public class PageIndex {
     /**
      * 把页面信息添加到对应的列表中
      * 首先，根据空闲空间大小计算出区间编号 number，然后将页面信息添加到对应的 lists 数组元素（对应的区间）中。
+     *
      * @param pageNo
      * @param freeSpace
      */
-    public void add(int pageNo, int freeSpace){
+    public void add(int pageNo, int freeSpace) {
         lock.lock();
-        try{
+        try {
             //空闲空间不会超过页面大小，所以除一个阈值得到分配到哪个区间里
             int number = freeSpace / THRESHOLD;
             lists[number].add(new PageInfo(pageNo, freeSpace));
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
 
     /**
      * 根据空间大小选择一个页面
+     *
      * @param spaceSize
      * @return
      */
-    public PageInfo select(int spaceSize){
+    public PageInfo select(int spaceSize) {
         lock.lock();
-        try{
+        try {
             int number = spaceSize / THRESHOLD;
             //往前加1个，保证freespace空间大于需求的空间
-            if(number < INTERVALS_NO) number ++;
-            while(number <= INTERVALS_NO){
-                if(lists[number].size() == 0){
-                    number ++;
+            if (number < INTERVALS_NO) number++;
+            while (number <= INTERVALS_NO) {
+                if (lists[number].size() == 0) {
+                    number++;
                     continue;
                 }
                 return lists[number].remove(0);
             }
             return null;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }

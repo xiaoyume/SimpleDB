@@ -22,7 +22,7 @@ public class Executor {
     }
 
     public void close() {
-        if(xid != 0) {
+        if (xid != 0) {
             System.out.println("Abnormal Abort: " + xid);
             tbm.abort(xid);
         }
@@ -30,6 +30,7 @@ public class Executor {
 
     /**
      * 执行语句
+     *
      * @param sql sql字节字节数据
      * @return
      * @throws Exception
@@ -38,23 +39,23 @@ public class Executor {
         System.out.println("Execute: " + new String(sql));
         Object stat = Parser.Parse(sql);
         //类检查，stat是不是一个Begin类的实例
-        if(Begin.class.isInstance(stat)) {
+        if (Begin.class.isInstance(stat)) {
             //xid必须是0
-            if(xid != 0) {
+            if (xid != 0) {
                 throw Error.NestedTransactionException;
             }
-            BeginRes r = tbm.begin((Begin)stat);
+            BeginRes r = tbm.begin((Begin) stat);
             xid = r.xid;
             return r.result;
-        } else if(Commit.class.isInstance(stat)) {//提交
-            if(xid == 0) {
+        } else if (Commit.class.isInstance(stat)) {//提交
+            if (xid == 0) {
                 throw Error.NoTransactionException;
             }
             byte[] res = tbm.commit(xid);
             xid = 0;
             return res;
-        } else if(Abort.class.isInstance(stat)) {
-            if(xid == 0) {
+        } else if (Abort.class.isInstance(stat)) {
+            if (xid == 0) {
                 throw Error.NoTransactionException;
             }
             byte[] res = tbm.abort(xid);
@@ -68,6 +69,7 @@ public class Executor {
 
     /**
      * 执行具体的sql
+     *
      * @param stat
      * @return
      * @throws Exception
@@ -77,7 +79,7 @@ public class Executor {
         boolean tmpTransaction = false;
         Exception e = null;
         //tbm.begin
-        if(xid == 0) {
+        if (xid == 0) {
             //
             tmpTransaction = true;
             BeginRes r = tbm.begin(new Begin());
@@ -85,28 +87,28 @@ public class Executor {
         }
         try {
             byte[] res = null;
-            if(Show.class.isInstance(stat)) {
+            if (Show.class.isInstance(stat)) {
                 res = tbm.show(xid);
-            } else if(Create.class.isInstance(stat)) {
-                res = tbm.create(xid, (Create)stat);
-            } else if(Read.class.isInstance(stat)) {
-                res = tbm.read(xid, (Read)stat);
-            } else if(Insert.class.isInstance(stat)) {
-                res = tbm.insert(xid, (Insert)stat);
-            } else if(Delete.class.isInstance(stat)) {
-                res = tbm.delete(xid, (Delete)stat);
-            } else if(Update.class.isInstance(stat)) {
-                res = tbm.update(xid, (Update)stat);
+            } else if (Create.class.isInstance(stat)) {
+                res = tbm.create(xid, (Create) stat);
+            } else if (Select.class.isInstance(stat)) {
+                res = tbm.read(xid, (Select) stat);
+            } else if (Insert.class.isInstance(stat)) {
+                res = tbm.insert(xid, (Insert) stat);
+            } else if (Delete.class.isInstance(stat)) {
+                res = tbm.delete(xid, (Delete) stat);
+            } else if (Update.class.isInstance(stat)) {
+                res = tbm.update(xid, (Update) stat);
             }
             return res;
-        } catch(Exception e1) {
+        } catch (Exception e1) {
             e = e1;
             throw e;
         } finally {
             //开启了事务
-            if(tmpTransaction) {
+            if (tmpTransaction) {
                 //有异常，直接回滚
-                if(e != null) {
+                if (e != null) {
                     tbm.abort(xid);
                 } else {
                     tbm.commit(xid);

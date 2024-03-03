@@ -6,7 +6,7 @@ package org.xiaoyume.simpleDB.backend.tm;
  * @description: TODO
  * @date 2024/2/21 16:23
  */
-public class MockTransactionManager implements TransactionManager{
+public class MockTransactionManager implements TransactionManager {
     @Override
     public long begin() {
         return 0;

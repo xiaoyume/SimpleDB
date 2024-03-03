@@ -9,9 +9,10 @@ package org.xiaoyume.simpleDB.backend.utils;
 public class Panic {
     /**
      * 发生异常时打印异常堆栈跟踪信息，然后退出程序
+     *
      * @param err
      */
-    public static void panic(Exception err){
+    public static void panic(Exception err) {
         err.printStackTrace();
         System.exit(1);
     }

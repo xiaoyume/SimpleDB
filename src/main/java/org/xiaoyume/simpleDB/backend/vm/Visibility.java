@@ -17,43 +17,44 @@ public class Visibility {
      * @param e
      * @return
      */
-    public static boolean isVersionSkip(TransactionManager tm, Transaction t, Entry e){
+    public static boolean isVersionSkip(TransactionManager tm, Transaction t, Entry e) {
         long xmax = e.getXmax();
-        if(t.level == 0){
+        if (t.level == 0) {
             return false;
-        }else{
+        } else {
             return tm.isCommitted(xmax) && (xmax > t.xid || t.isInSnapshot(xmax));
         }
     }
 
-    public static boolean isVisible(TransactionManager tm, Transaction t, Entry e){
-        if(t.level == 0){
+    public static boolean isVisible(TransactionManager tm, Transaction t, Entry e) {
+        if (t.level == 0) {
             return readCommitted(tm, t, e);
-        }else{
+        } else {
             return repeatableRead(tm, t, e);
         }
     }
 
     /**
      * 读已提交 隔离级别判断数据可见性
+     *
      * @param tm
      * @param t
      * @param e
      * @return
      */
-    private static boolean readCommitted(TransactionManager tm, Transaction t, Entry e){
+    private static boolean readCommitted(TransactionManager tm, Transaction t, Entry e) {
         long xid = t.xid;
         long xmin = e.getXmin();
         long xmax = e.getXmax();
         //是当前事务，可见
-        if(xmin == xid && xmax == 0) return true;
+        if (xmin == xid && xmax == 0) return true;
         //如果xmin提交了
-        if(tm.isCommitted(xmin)){
+        if (tm.isCommitted(xmin)) {
             //
-            if(xmax == 0) return true;
+            if (xmax == 0) return true;
             //如果xmax不是当前事务，需要进一步判断xmax是否提交
-            if(xmax != xid){
-                if(!tm.isCommitted(xmax)){
+            if (xmax != xid) {
+                if (!tm.isCommitted(xmax)) {
                     return true;
                 }
             }
@@ -61,16 +62,16 @@ public class Visibility {
         return false;
     }
 
-    private static boolean repeatableRead(TransactionManager tm, Transaction t, Entry e){
+    private static boolean repeatableRead(TransactionManager tm, Transaction t, Entry e) {
         long xid = t.xid;
         long xmin = e.getXmin();
         long xmax = e.getXmax();
-        if(xmin == xid && xmax == 0) return true;
+        if (xmin == xid && xmax == 0) return true;
 
-        if(tm.isCommitted(xmin) && xmin < xid && !t.isInSnapshot(xmin)){
-            if(xmax == 0) return true;
-            if(xmax != xid){
-                if(!tm.isCommitted(xmax) || xmax > xid || t.isInSnapshot(xmax)){
+        if (tm.isCommitted(xmin) && xmin < xid && !t.isInSnapshot(xmin)) {
+            if (xmax == 0) return true;
+            if (xmax != xid) {
+                if (!tm.isCommitted(xmax) || xmax > xid || t.isInSnapshot(xmax)) {
                     return true;
                 }
             }

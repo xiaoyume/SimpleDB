@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description: 管理数据库中的表，包括表的创建、插入、读取、更新、删除等操作
  * @date 2024/2/29 21:06
  */
-public class TableManagerImpl implements TableManager{
+public class TableManagerImpl implements TableManager {
     //版本管理器
     VersionManager vm;
     //数据管理器
@@ -43,11 +43,11 @@ public class TableManagerImpl implements TableManager{
     }
 
     /**
-     *加载所有的表到缓存里
+     * 加载所有的表到缓存里
      */
     private void loadTables() {
         long uid = firstTableUid();
-        while(uid != 0) {
+        while (uid != 0) {
             Table tb = Table.loadTable(this, uid);
             uid = tb.nextUid;
             tableCache.put(tb.name, tb);
@@ -56,6 +56,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * booter里取出第一个表的uid
+     *
      * @return
      */
     private long firstTableUid() {
@@ -65,6 +66,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 更新第一个表id
+     *
      * @param uid
      */
     private void updateFirstTableUid(long uid) {
@@ -74,6 +76,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 事务启动
+     *
      * @param begin
      * @return
      */
@@ -81,7 +84,7 @@ public class TableManagerImpl implements TableManager{
     public BeginRes begin(Begin begin) {
         BeginRes res = new BeginRes();
         //是否是可重复读级别
-        int level = begin.isRepeatableRead?1:0;
+        int level = begin.isRepeatableRead ? 1 : 0;
         res.xid = vm.begin(level);
         res.result = "begin".getBytes();
         return res;
@@ -89,6 +92,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 事务提交
+     *
      * @param xid
      * @return
      * @throws Exception
@@ -101,6 +105,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 事务回滚
+     *
      * @param xid
      * @return
      */
@@ -112,6 +117,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 所有表信息
+     *
      * @param xid
      * @return
      */
@@ -124,6 +130,9 @@ public class TableManagerImpl implements TableManager{
                 sb.append(tb.toString()).append("\n");
             }
             List<Table> t = xidTableCache.get(xid);
+            if (t == null) {
+                return "\n".getBytes();
+            }
             for (Table tb : t) {
                 sb.append(tb.toString()).append("\n");
             }
@@ -134,7 +143,8 @@ public class TableManagerImpl implements TableManager{
     }
 
     /**
-     *创建新表
+     * 创建新表
+     *
      * @param xid
      * @param create
      * @return 返回一个create + 表名的字符的字节数组
@@ -144,14 +154,14 @@ public class TableManagerImpl implements TableManager{
     public byte[] create(long xid, Create create) throws Exception {
         lock.lock();
         try {
-            if(tableCache.containsKey(create.tableName)) {
+            if (tableCache.containsKey(create.tableName)) {
                 throw Error.DuplicatedTableException;
             }
             //新建一个表，就把新建表的uid放到第一个表
             Table table = Table.createTable(this, firstTableUid(), xid, create);
             updateFirstTableUid(table.uid);
             tableCache.put(create.tableName, table);
-            if(!xidTableCache.containsKey(xid)) {
+            if (!xidTableCache.containsKey(xid)) {
                 xidTableCache.put(xid, new ArrayList<>());
             }
             xidTableCache.get(xid).add(table);
@@ -163,6 +173,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 值插入到表中
+     *
      * @param xid
      * @param insert
      * @return
@@ -173,7 +184,7 @@ public class TableManagerImpl implements TableManager{
         lock.lock();
         Table table = tableCache.get(insert.tableName);
         lock.unlock();
-        if(table == null) {
+        if (table == null) {
             throw Error.TableNotFoundException;
         }
         table.insert(xid, insert);
@@ -182,24 +193,26 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 根据表名，字段和条件来读取数据
+     *
      * @param xid
-     * @param read
+     * @param select
      * @return
      * @throws Exception
      */
     @Override
-    public byte[] read(long xid, Read read) throws Exception {
+    public byte[] read(long xid, Select select) throws Exception {
         lock.lock();
-        Table table = tableCache.get(read.tableName);
+        Table table = tableCache.get(select.tableName);
         lock.unlock();
-        if(table == null) {
+        if (table == null) {
             throw Error.TableNotFoundException;
         }
-        return table.read(xid, read).getBytes();
+        return table.read(xid, select).getBytes();
     }
 
     /**
      * 更新表中特定字段的值
+     *
      * @param xid
      * @param update
      * @return
@@ -210,7 +223,7 @@ public class TableManagerImpl implements TableManager{
         lock.lock();
         Table table = tableCache.get(update.tableName);
         lock.unlock();
-        if(table == null) {
+        if (table == null) {
             throw Error.TableNotFoundException;
         }
         int count = table.update(xid, update);
@@ -219,6 +232,7 @@ public class TableManagerImpl implements TableManager{
 
     /**
      * 删除
+     *
      * @param xid
      * @param delete
      * @return
@@ -229,7 +243,7 @@ public class TableManagerImpl implements TableManager{
         lock.lock();
         Table table = tableCache.get(delete.tableName);
         lock.unlock();
-        if(table == null) {
+        if (table == null) {
             throw Error.TableNotFoundException;
         }
         int count = table.delete(xid, delete);

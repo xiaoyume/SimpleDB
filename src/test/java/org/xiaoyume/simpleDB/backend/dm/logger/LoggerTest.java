@@ -10,7 +10,7 @@ import org.junit.Test;
  */
 public class LoggerTest {
     @Test
-    public void testLogger(){
+    public void testLogger() {
         Logger lg = Logger.create("D:/db/logger_test");
         lg.log("aaa".getBytes());
         lg.log("bbb".getBytes());

@@ -12,12 +12,14 @@ import org.xiaoyume.simpleDB.transport.Packager;
 public class RoundTripper {
     //包传输器
     private Packager packager;
-    public RoundTripper(Packager packager){
+
+    public RoundTripper(Packager packager) {
         this.packager = packager;
     }
 
     /**
      * 发送包，接收包
+     *
      * @param pkg
      * @return
      * @throws Exception

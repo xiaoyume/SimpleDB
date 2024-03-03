@@ -20,7 +20,8 @@ public class MockDataItem implements DataItem {
     private long uid;
     private Lock rLock;
     private Lock wlock;
-    public static MockDataItem newMockDataItem(long uid, SubArray data){
+
+    public static MockDataItem newMockDataItem(long uid, SubArray data) {
         MockDataItem mockDataItem = new MockDataItem();
         mockDataItem.data = data;
         mockDataItem.oldData = new byte[data.end - data.start];
@@ -30,6 +31,7 @@ public class MockDataItem implements DataItem {
         mockDataItem.wlock = lock.writeLock();
         return mockDataItem;
     }
+
     @Override
     public SubArray data() {
         return data;

@@ -9,10 +9,12 @@ package org.xiaoyume.simpleDB.transport;
 public class Packager {
     private Transpoter transpoter;
     private Encoder encoder;
+
     public Packager(Transpoter transpoter, Encoder encoder) {
         this.transpoter = transpoter;
         this.encoder = encoder;
     }
+
     public void send(Package pkg) throws Exception {
         byte[] data = encoder.encode(pkg);
         transpoter.send(data);

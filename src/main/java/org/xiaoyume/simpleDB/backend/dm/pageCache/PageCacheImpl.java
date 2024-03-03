@@ -20,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description: TODO
  * @date 2024/2/18 11:04
  */
-public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
+public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
     //最小缓存限制
     private static final int MEM_MIN_LIM = 10;
     public static final String DB_SUFFIX = ".db";
@@ -29,51 +29,54 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     private Lock fileLock;
     private AtomicInteger pageNos;
 
-    public PageCacheImpl(RandomAccessFile file, FileChannel fc, int maxResource){
+    public PageCacheImpl(RandomAccessFile file, FileChannel fc, int maxResource) {
         super(maxResource);
-        if(maxResource < MEM_MIN_LIM){
+        if (maxResource < MEM_MIN_LIM) {
             Panic.panic(Error.MemTooSmallException);
         }
         long length = 0;
-        try{
+        try {
             length = file.length();
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
         }
         this.file = file;
         this.fc = fc;
         this.fileLock = new ReentrantLock();
-        this.pageNos = new AtomicInteger((int)length/PAGE_SIZE);
+        this.pageNos = new AtomicInteger((int) length / PAGE_SIZE);
     }
+
     @Override
-    public int newPage(byte[] initData){
+    public int newPage(byte[] initData) {
         int pageNo = pageNos.incrementAndGet();
         Page page = new PageImpl(pageNo, initData, null);
         flush(page);
         return pageNo;
     }
+
     @Override
     public Page getPage(int pageNo) throws Exception {
-        return get((long)pageNo);
+        return get((long) pageNo);
     }
 
     /**
      * 根据pageNo从数据库文件里读取页数据，并转为Page
+     *
      * @param key
      * @return
      * @throws Exception
      */
     @Override
     protected Page getForCache(long key) throws Exception {
-        int pageNo = (int)key;
+        int pageNo = (int) key;
         long offset = PageCacheImpl.pageOffset(pageNo);
 
         ByteBuffer buf = ByteBuffer.allocate(PAGE_SIZE);
         fileLock.lock();
-        try{
+        try {
             fc.position(offset);
             fc.read(buf);
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
         }
         fileLock.unlock();
@@ -82,35 +85,38 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
 
     @Override
     protected void releaseForCache(Page page) {
-        if(page.isDirty()){
+        if (page.isDirty()) {
             flush(page);
             page.setDirty(false);
         }
     }
-    public void release(Page page){
-        release((long)page.getPageNumber());
+
+    public void release(Page page) {
+        release((long) page.getPageNumber());
     }
-    public void flushPage(Page page){
+
+    public void flushPage(Page page) {
         flush(page);
     }
 
     /**
-     *强制刷新页面
+     * 强制刷新页面
+     *
      * @param page
      */
-    private void flush(Page page){
+    private void flush(Page page) {
         int pageNo = page.getPageNumber();
         long offset = pageOffset(pageNo);
 
         fileLock.lock();
-        try{
+        try {
             ByteBuffer buf = ByteBuffer.wrap(page.getData());
             fc.position(offset);
             fc.write(buf);
             fc.force(true);
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
-        }finally {
+        } finally {
             fileLock.unlock();
         }
     }
@@ -118,20 +124,21 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     @Override
     public void truncateByBgno(int maxPgno) {
         long size = pageOffset(maxPgno + 1);
-        try{
+        try {
             file.setLength(size);
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
         }
         pageNos.set(maxPgno);
     }
+
     @Override
     public void close() {
         super.close();
-        try{
+        try {
             fc.close();
             file.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
         }
     }
@@ -143,10 +150,11 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
 
     /**
      * 根据页号获取页偏移
+     *
      * @param pageNo
      * @return
      */
-    private static long pageOffset(int pageNo){
+    private static long pageOffset(int pageNo) {
         return (pageNo - 1) * PAGE_SIZE;
     }
 

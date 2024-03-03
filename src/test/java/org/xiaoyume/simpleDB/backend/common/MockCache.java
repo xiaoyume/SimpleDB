@@ -6,8 +6,8 @@ package org.xiaoyume.simpleDB.backend.common;
  * @description: TODO
  * @date 2024/2/17 21:58
  */
-public class MockCache extends AbstractCache<Long>{
-    public MockCache(){
+public class MockCache extends AbstractCache<Long> {
+    public MockCache() {
         super(50);
     }
 

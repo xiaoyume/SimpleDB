@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description: TODO
  * @date 2024/2/26 20:00
  */
-public class VersionManagerImpl extends AbstractCache<Entry> implements VersionManager{
+public class VersionManagerImpl extends AbstractCache<Entry> implements VersionManager {
     TransactionManager tm;
     DataManager dataManager;
     Map<Long, Transaction> activeTransaction;
@@ -36,7 +36,6 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
     }
 
     /**
-     *
      * @param xid
      * @param uid
      * @return
@@ -48,28 +47,28 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         Transaction t = activeTransaction.get(xid);
         lock.unlock();
 
-        if(t.err != null){
+        if (t.err != null) {
             throw t.err;
         }
 
         Entry entry = null;
-        try{
+        try {
             entry = super.get(uid);
-        }catch (Exception e){
-            if(e == Error.NullEntryException){
+        } catch (Exception e) {
+            if (e == Error.NullEntryException) {
                 return null;
-            }else{
+            } else {
                 throw e;
             }
         }
 
-        try{
-            if(Visibility.isVisible(tm, t, entry)){
+        try {
+            if (Visibility.isVisible(tm, t, entry)) {
                 return entry.data();
-            }else{
+            } else {
                 return null;
             }
-        }finally {
+        } finally {
             entry.release();
         }
     }
@@ -79,7 +78,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         lock.lock();
         Transaction t = activeTransaction.get(xid);
         lock.unlock();
-        if(t.err != null){
+        if (t.err != null) {
             throw t.err;
         }
 
@@ -93,39 +92,42 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         Transaction t = activeTransaction.get(xid);
         lock.unlock();
 
-        if(t.err != null){
+        if (t.err != null) {
             throw t.err;
         }
         Entry entry = null;
-        try{
+        try {
             entry = super.get(uid);
-        }catch (Exception e){
-            if(e == Error.NullEntryException){
+        } catch (Exception e) {
+            if (e == Error.NullEntryException) {
                 return false;
-            }else{
+            } else {
                 throw e;
             }
         }
-        try{
-            if(!Visibility.isVisible(tm, t, entry)){
+        try {
+            if (!Visibility.isVisible(tm, t, entry)) {
                 Lock l = null;
-                try{
+                try {
                     l = lt.add(xid, uid);
-                }catch (Exception e){
+                } catch (Exception e) {
                     t.err = Error.ConcurrentUpdateException;
                     internAbort(xid, true);
                     t.autoAborted = true;
                     throw t.err;
                 }
             }
-            lock.lock();
-            lock.unlock();
+            if (lock != null) {
+                lock.lock();
+                lock.unlock();
+            }
 
-            if(entry.getXmax() == xid){
+
+            if (entry.getXmax() == xid) {
                 return false;
             }
 
-            if(Visibility.isVersionSkip(tm, t, entry)){
+            if (Visibility.isVersionSkip(tm, t, entry)) {
                 t.err = Error.ConcurrentUpdateException;
                 internAbort(xid, true);
                 t.autoAborted = true;
@@ -134,7 +136,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
 
             entry.setXmax(xid);
             return true;
-        }finally {
+        } finally {
             entry.release();
         }
     }
@@ -142,12 +144,12 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
     @Override
     public long begin(int level) {
         lock.lock();
-        try{
+        try {
             long xid = tm.begin();
             Transaction t = Transaction.newTransaction(xid, level, activeTransaction);
             activeTransaction.put(xid, t);
             return xid;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -157,11 +159,11 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         lock.lock();
         Transaction t = activeTransaction.get(xid);
         lock.unlock();
-        try{
-            if(t.err != null){
+        try {
+            if (t.err != null) {
                 throw t.err;
             }
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             System.out.println(xid);
             System.out.println(activeTransaction.keySet());
             Panic.panic(e);
@@ -179,33 +181,34 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         internAbort(xid, false);
     }
 
-    private void internAbort(long xid, boolean autoAborted){
+    private void internAbort(long xid, boolean autoAborted) {
         lock.lock();
         Transaction t = activeTransaction.get(xid);
-        if(!autoAborted){
+        if (!autoAborted) {
             activeTransaction.remove(xid);
         }
         lock.unlock();
 
-        if(t.autoAborted) return;
+        if (t.autoAborted) return;
         lt.remove(xid);
         tm.abort(xid);
     }
-    public void releaseEntry(Entry entry){
+
+    public void releaseEntry(Entry entry) {
         super.release(entry.getUID());
     }
 
     @Override
     protected Entry getForCache(long uid) throws Exception {
         Entry entry = Entry.loadEntry(this, uid);
-        if(entry == null){
+        if (entry == null) {
             throw Error.NullEntryException;
         }
         return entry;
     }
 
     @Override
-    protected void releaseForCache(Entry entry){
+    protected void releaseForCache(Entry entry) {
         entry.remove();
     }
 }

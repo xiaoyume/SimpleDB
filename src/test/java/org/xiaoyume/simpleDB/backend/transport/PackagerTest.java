@@ -61,23 +61,24 @@ public class PackagerTest {
             ServerSocket ss = new ServerSocket(8888);
             System.out.println("启动服务器....");
             Socket s = ss.accept();
-            System.out.println("客户端:"+s.getInetAddress().getLocalHost()+"已连接到服务器");
+            System.out.println("客户端:" + s.getInetAddress().getLocalHost() + "已连接到服务器");
 
             BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
             //读取客户端发送来的消息
             String mess = br.readLine();
-            System.out.println("客户端："+mess);
+            System.out.println("客户端：" + mess);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-            bw.write(mess+"\n");
+            bw.write(mess + "\n");
             bw.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     @Test
     public void testSocket2() throws Exception {
         try {
-            Socket s = new Socket("127.0.0.1",8888);
+            Socket s = new Socket("127.0.0.1", 8888);
 
             //构建IO
             InputStream is = s.getInputStream();
@@ -91,7 +92,7 @@ public class PackagerTest {
             //读取服务器返回的消息
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String mess = br.readLine();
-            System.out.println("服务器："+mess);
+            System.out.println("服务器：" + mess);
         } catch (IOException e) {
             e.printStackTrace();
         }

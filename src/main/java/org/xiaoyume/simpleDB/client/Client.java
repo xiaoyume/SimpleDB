@@ -11,6 +11,7 @@ import org.xiaoyume.simpleDB.transport.Packager;
  */
 public class Client {
     private RoundTripper rt;
+
     public Client(Packager packager) {
         this.rt = new RoundTripper(packager);
     }
@@ -18,6 +19,7 @@ public class Client {
     /**
      * 客户端处理，
      * 打包，发送，接收，获得返回数据
+     *
      * @param stat
      * @return
      * @throws Exception
@@ -25,7 +27,7 @@ public class Client {
     public byte[] execute(byte[] stat) throws Exception {
         Package pkg = new Package(stat, null);
         Package resPkg = rt.roundTrip(pkg);
-        if(resPkg.getErr() != null) {
+        if (resPkg.getErr() != null) {
             throw resPkg.getErr();
         }
         return resPkg.getData();

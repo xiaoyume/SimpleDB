@@ -21,24 +21,27 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MockDataManager implements DataManager {
     private Map<Long, DataItem> cache;
     private Lock lock;
+
     public static MockDataManager newMockDataManager() {
         MockDataManager mockDataManager = new MockDataManager();
         mockDataManager.cache = new HashMap<>();
         mockDataManager.lock = new ReentrantLock();
         return mockDataManager;
     }
+
     @Override
     public DataItem read(long uid) throws Exception {
         lock.lock();
-        try{
+        try {
             return cache.get(uid);
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
 
     /**
      * 插入一个数据，返回uid
+     *
      * @param xid
      * @param data
      * @return
@@ -47,20 +50,20 @@ public class MockDataManager implements DataManager {
     @Override
     public long insert(long xid, byte[] data) throws Exception {
         lock.lock();
-        try{
+        try {
             //获取一个不重复uid
             long uid = 0;
-            while(true){
+            while (true) {
                 uid = Math.abs(new Random(System.nanoTime()).nextInt(Integer.MAX_VALUE));
-                if(uid == 0) continue;
-                if(cache.containsKey(uid)) continue;
+                if (uid == 0) continue;
+                if (cache.containsKey(uid)) continue;
                 break;
             }
 
             DataItem dataItem = MockDataItem.newMockDataItem(uid, new SubArray(data, 0, data.length));
             cache.put(uid, dataItem);
             return uid;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }

@@ -12,10 +12,11 @@ import java.util.Random;
 public class RandomUtil {
     /**
      * 生成随机字节数组
+     *
      * @param length
      * @return
      */
-    public static byte[] randomBytes(int length){
+    public static byte[] randomBytes(int length) {
         Random r = new SecureRandom();
         byte[] buf = new byte[length];
         r.nextBytes(buf);

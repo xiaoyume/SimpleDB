@@ -26,7 +26,7 @@ public abstract class AbstractCache<T> {
     private int count = 0;
     private Lock lock;
 
-    public AbstractCache(int maxResource){
+    public AbstractCache(int maxResource) {
         this.maxResource = maxResource;
         cache = new HashMap<>();
         references = new HashMap<>();
@@ -39,26 +39,27 @@ public abstract class AbstractCache<T> {
      * 1.判断是否该资源正在被其它线程获取，如果是就循环等待
      * 2.判断资源是否在缓存中，如果在直接返回，不在就需要从外部获取，读取数据需要时间，所以需要表示资源正在被线程获取
      * 3.从外部读取数据,
+     *
      * @param key
      * @return
      * @throws Exception
      */
     protected T get(long key) throws Exception {
-        while(true){
+        while (true) {
             lock.lock();
-            if(getting.containsKey(key)){
+            if (getting.containsKey(key)) {
                 //请求的资源正在被其它线程获取，等待一段时间
                 lock.unlock();
-                try{
+                try {
                     Thread.sleep(1);
-                }catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                     continue;
                 }
                 continue;
             }
             //如果资源在缓存中，直接返回
-            if(cache.containsKey(key)){
+            if (cache.containsKey(key)) {
                 //资源在缓存中，直接返回
                 T obj = cache.get(key);
                 references.put(key, references.get(key) + 1);
@@ -67,23 +68,23 @@ public abstract class AbstractCache<T> {
                 return obj;
             }
             //资源不在缓存中，正在请求资源，直接终端循环，需要读取资源
-            if(maxResource > 0 && count >= maxResource){
+            if (maxResource > 0 && count >= maxResource) {
                 lock.unlock();
                 throw Error.CacheFullException;
             }
-            count ++;
+            count++;
             getting.put(key, true);
             lock.unlock();
             break;
         }
 
         T obj = null;
-        try{
+        try {
             //不在缓存,获取资源
             obj = getForCache(key);
-        }catch (Exception e){//资源获取失败，释放资源获取状态
+        } catch (Exception e) {//资源获取失败，释放资源获取状态
             lock.lock();
-            count --;
+            count--;
             getting.remove(key);
             lock.unlock();
             throw e;
@@ -100,43 +101,45 @@ public abstract class AbstractCache<T> {
 
     /**
      * 资源被release一次就计数减1
+     *
      * @param key
      */
-    protected void release(long key){
+    protected void release(long key) {
         lock.lock();
-        try{
+        try {
             int ref = references.get(key) - 1;
-            if(ref == 0){
+            if (ref == 0) {
                 T obj = cache.get(key);
                 //资源被驱逐，释放资源
                 releaseForCache(obj);
                 references.remove(key);
                 cache.remove(key);
-                count --;
-            }else{
+                count--;
+            } else {
                 references.put(key, ref);
             }
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
 
-    protected void close(){
+    protected void close() {
         lock.lock();
-        try{
+        try {
             Set<Long> keys = cache.keySet();
-            for(long key : keys){
+            for (long key : keys) {
                 release(key);
                 references.remove(key);
                 cache.remove(key);
             }
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
 
     /**
      * 当资源不在缓存时获取
+     *
      * @param key
      * @return
      * @throws Exception
@@ -145,6 +148,7 @@ public abstract class AbstractCache<T> {
 
     /**
      * 当资源被驱逐时写回
+     *
      * @param obj
      */
     protected abstract void releaseForCache(T obj);

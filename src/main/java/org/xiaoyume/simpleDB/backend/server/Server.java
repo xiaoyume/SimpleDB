@@ -53,22 +53,23 @@ public class Server {
         //饱和策略
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(10, 20, 1L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100), new ThreadPoolExecutor.CallerRunsPolicy());
         //循环监听，当有客户端连接时，创建一个线程处理
-        while(true) {
-            try {
+        try {
+            while (true) {
                 Socket socket = ss.accept();
                 //可以作为线程执行的任务
                 Runnable worker = new HandleSocket(socket, tbm);
                 tpe.execute(worker);
-            } catch(IOException e) {
-                e.printStackTrace();
-                continue;
-            } finally {
-                try {
-                    ss.close();
-                } catch (IOException e) {}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                ss.close();
+            } catch (IOException e) {
             }
         }
     }
+
 }
 
 class HandleSocket implements Runnable {
@@ -83,14 +84,14 @@ class HandleSocket implements Runnable {
     @Override
     public void run() {
         //获取客户端的地址和端口信息
-        InetSocketAddress address = (InetSocketAddress)socket.getRemoteSocketAddress();
-        System.out.println("Establish connection: " + address.getAddress().getHostAddress()+":"+address.getPort());
+        InetSocketAddress address = (InetSocketAddress) socket.getRemoteSocketAddress();
+        System.out.println("Establish connection: " + address.getAddress().getHostAddress() + ":" + address.getPort());
         Packager packager = null;
         try {
             Transpoter t = new Transpoter(socket);
             Encoder e = new Encoder();
             packager = new Packager(t, e);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             try {
                 socket.close();
@@ -101,11 +102,11 @@ class HandleSocket implements Runnable {
         }
         Executor exe = new Executor(tbm);
         //不断接收客户端发送的数据包
-        while(true) {
+        while (true) {
             Package pkg = null;
             try {
                 pkg = packager.receive();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 break;
             }
             byte[] sql = pkg.getData();
@@ -116,12 +117,14 @@ class HandleSocket implements Runnable {
                 result = exe.execute(sql);
             } catch (Exception e1) {
                 e = e1;
+                e.printStackTrace();
             }
             //发送结果
             pkg = new Package(result, e);
             try {
                 packager.send(pkg);
             } catch (Exception e1) {
+                e1.printStackTrace();
                 break;
             }
         }

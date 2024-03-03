@@ -6,7 +6,7 @@ package org.xiaoyume.simpleDB.backend.parser.statement;
  * @description: TODO
  * @date 2024/3/1 15:47
  */
-public class Read {
+public class Select {
     public String tableName;
     public String[] fields;
     public Where where;

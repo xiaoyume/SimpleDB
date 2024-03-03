@@ -178,7 +178,9 @@ public class Field {
         return null;
     }
 
-    /**数据转 uid, String "dfsfgfg"
+    /**
+     * 数据转 uid, String "dfsfgfg"
+     *
      * @param key
      * @return
      */

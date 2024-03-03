@@ -17,9 +17,9 @@ import org.xiaoyume.simpleDB.common.Error;
  * @date 2024/3/3 14:35
  */
 public class Launcher {
-    public static final int port = 8080;
+    public static final int port = 9999;
     //默认大小是64M
-    public static final long DEFAULT_MEM = (1 << 20)*64;
+    public static final long DEFAULT_MEM = (1 << 20) * 64;
     public static final long KB = 1 << 10;
     public static final long MB = 1 << 20;
     public static final long GB = 1 << 30;
@@ -27,24 +27,25 @@ public class Launcher {
     public static void main(String[] args) throws ParseException {
         Options opts = new Options();
         //3个选项，开启，创建数据库，指定内存大小
-        opts.addOption("open", false, "-openDBPath");
-        opts.addOption("create", false, "-createDBPath");
-        opts.addOption("mem", false, "-mem 64MB");
+        opts.addOption("open", true, "-openDBPath");
+        opts.addOption("create", true, "-createDBPath");
+        opts.addOption("mem", true, "-mem 64MB");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(opts, args);
 
-        if(cmd.hasOption("open")){
+        if (cmd.hasOption("open")) {
             openDB(cmd.getOptionValue("oepn"), parseMem(cmd.getOptionValue("mem")));
             return;
         }
-        if(cmd.hasOption("create")){
+        if (cmd.hasOption("create")) {
             createDB(cmd.getOptionValue("create"));
+            return;
         }
         System.out.println("Usage : laucher (open|create) DBPath");
     }
 
-    private static void createDB(String path){
+    private static void createDB(String path) {
         TransactionManager tm = TransactionManager.create(path);
         DataManager dm = DataManager.create(path, DEFAULT_MEM, tm);
         VersionManager vm = new VersionManagerImpl(tm, dm);
@@ -53,7 +54,7 @@ public class Launcher {
         dm.close();
     }
 
-    private static void openDB(String path, long mem){
+    private static void openDB(String path, long mem) {
         TransactionManager tm = TransactionManager.open(path);
         DataManager dm = DataManager.open(path, mem, tm);
         VersionManager vm = new VersionManagerImpl(tm, dm);
@@ -64,25 +65,26 @@ public class Launcher {
 
     /**
      * 解析用户输入的内存大小 "100000KB",最后两位是单位，前面是数字
+     *
      * @param memStr
      * @return
      */
-    private static long parseMem(String memStr){
-        if("".equals(memStr)){
+    private static long parseMem(String memStr) {
+        if (memStr == null || "".equals(memStr)) {
             return DEFAULT_MEM;
         }
-        if(memStr.length() < 2){
+        if (memStr.length() < 2) {
             Panic.panic(Error.InvalidMemException);
         }
-        String unit = memStr.substring(memStr.length()-1);
-        long memNum = Long.parseLong(memStr.substring(0, memStr.length()-2));
-        switch (unit){
+        String unit = memStr.substring(memStr.length() - 1);
+        long memNum = Long.parseLong(memStr.substring(0, memStr.length() - 2));
+        switch (unit) {
             case "KB":
-                return memNum*KB;
+                return memNum * KB;
             case "MB":
-                return memNum*MB;
+                return memNum * MB;
             case "GB":
-                return memNum*GB;
+                return memNum * GB;
             default:
                 Panic.panic(Error.InvalidMemException);
         }

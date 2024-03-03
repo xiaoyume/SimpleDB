@@ -10,25 +10,26 @@ import java.util.Scanner;
  */
 public class Shell {
     private Client client;
-    public Shell(Client client){
+
+    public Shell(Client client) {
         this.client = client;
     }
+
     public void run() {
         Scanner sc = new Scanner(System.in);
         try {
-            while(true) {
+            while (true) {
                 System.out.print(":> ");
                 //只接收一行数据，没有实现多行处理逻辑
-                String line = sc.nextLine();
-                String statStr = line.substring(0, line.length()-1);
-                if("exit".equals(statStr) || "quit".equals(statStr)) {
+                String statStr = sc.nextLine();
+                if ("exit".equals(statStr) || "quit".equals(statStr)) {
                     break;
                 }
                 try {
                     //给客户端和服务器交互
                     byte[] res = client.execute(statStr.getBytes());
                     System.out.println(new String(res));
-                } catch(Exception e) {
+                } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
 

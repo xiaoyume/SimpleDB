@@ -15,19 +15,20 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description: TODO
  * @date 2024/2/18 14:13
  */
-public class MockPageCache implements PageCache{
+public class MockPageCache implements PageCache {
     private Map<Integer, MockPage> cache = new HashMap<>();
     private Lock lock = new ReentrantLock();
     private AtomicInteger pageCount = new AtomicInteger(0);
+
     @Override
     public int newPage(byte[] initData) {
         lock.lock();
-        try{
+        try {
             int pageNo = pageCount.incrementAndGet();
             MockPage page = MockPage.newMockPage(pageNo, initData);
             cache.put(pageNo, page);
             return pageNo;
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -35,9 +36,9 @@ public class MockPageCache implements PageCache{
     @Override
     public Page getPage(int pgNo) throws Exception {
         lock.lock();
-        try{
+        try {
             return cache.get(pgNo);
-        }finally {
+        } finally {
             lock.unlock();
         }
     }

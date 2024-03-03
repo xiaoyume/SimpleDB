@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @description: TODO
  * @date 2024/2/19 17:39
  */
-public class TransactionManagerImpl implements TransactionManager{
+public class TransactionManagerImpl implements TransactionManager {
     //XID文件头长度
     static final int LEN_XID_HEADER_LENGTH = 8;
     //xid字段长度，一个字节
@@ -139,59 +139,66 @@ public class TransactionManagerImpl implements TransactionManager{
             updateXID(xid, FIELD_TRAN_ACTIVE);
             incrXIDCounter();
             return xid;
-        }finally {
+        } finally {
             counterLock.unlock();
         }
     }
 
     /**
      * 提交事务
+     *
      * @param xid
      */
-    public void commit(long xid){
+    public void commit(long xid) {
         updateXID(xid, FIELD_TRAN_COMMITTED);
     }
+
     /**
      * 回滚事务
      */
-    public void abort(long xid){
+    public void abort(long xid) {
         updateXID(xid, FIEDL_TRAN_ABORTED);
     }
 
     /**
      * 检测文件中xid事务状态是否是status
+     *
      * @param xid
      * @param status
      * @return
      */
-    private boolean checkXID(long xid, byte status){
+    private boolean checkXID(long xid, byte status) {
         long offset = getXidPosition(xid);
         ByteBuffer buf = ByteBuffer.wrap(new byte[XID_FIELD_SIZE]);
-        try{
+        try {
             fc.position(offset);
             fc.read(buf);
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
         }
         return buf.array()[0] == status;
     }
-    public boolean isActive(long xid){
-        if(xid == SUPER_XID) return false;
+
+    public boolean isActive(long xid) {
+        if (xid == SUPER_XID) return false;
         return checkXID(xid, FIELD_TRAN_ACTIVE);
     }
-    public boolean isCommitted(long xid){
-        if(xid == SUPER_XID) return true;
+
+    public boolean isCommitted(long xid) {
+        if (xid == SUPER_XID) return true;
         return checkXID(xid, FIELD_TRAN_COMMITTED);
     }
-    public boolean isAborted(long xid){
-        if(xid == SUPER_XID) return false;
+
+    public boolean isAborted(long xid) {
+        if (xid == SUPER_XID) return false;
         return checkXID(xid, FIEDL_TRAN_ABORTED);
     }
-    public void close(){
-        try{
+
+    public void close() {
+        try {
             fc.close();
             file.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             Panic.panic(e);
         }
     }

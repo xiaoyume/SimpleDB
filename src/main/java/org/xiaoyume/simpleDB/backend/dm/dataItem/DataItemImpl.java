@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Datasize 2Byte 数据大小
  * @date 2024/2/18 21:42
  */
-public class DataItemImpl implements DataItem{
+public class DataItemImpl implements DataItem {
     static final int OF_VALID = 0;
     static final int OF_SIZE = 1;
     static final int OF_DATA = 3;
@@ -31,7 +31,7 @@ public class DataItemImpl implements DataItem{
     private long uid;
     private Page page;
 
-    public DataItemImpl(SubArray raw, byte[] oldRaw, Page page, long uid, DataManagerImpl dm){
+    public DataItemImpl(SubArray raw, byte[] oldRaw, Page page, long uid, DataManagerImpl dm) {
         this.raw = raw;
         this.oldRaw = oldRaw;
         ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -41,12 +41,14 @@ public class DataItemImpl implements DataItem{
         this.uid = uid;
         this.page = page;
     }
+
     public boolean isValid() {
-        return raw.raw[raw.start + OF_VALID] == (byte)0;
+        return raw.raw[raw.start + OF_VALID] == (byte) 0;
     }
+
     @Override
     public SubArray data() {
-        return new SubArray(raw.raw, raw.start+ OF_DATA, raw.end);
+        return new SubArray(raw.raw, raw.start + OF_DATA, raw.end);
     }
 
     /**
@@ -69,7 +71,6 @@ public class DataItemImpl implements DataItem{
     }
 
     /**
-     *
      * @param xid
      */
     @Override

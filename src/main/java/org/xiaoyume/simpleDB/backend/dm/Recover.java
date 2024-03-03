@@ -10,6 +10,7 @@ import org.xiaoyume.simpleDB.backend.dm.pageCache.PageCache;
 import org.xiaoyume.simpleDB.backend.tm.TransactionManager;
 import org.xiaoyume.simpleDB.backend.utils.Panic;
 import org.xiaoyume.simpleDB.backend.utils.Parser;
+
 import java.util.Map.Entry;
 
 import java.util.*;
@@ -30,7 +31,7 @@ public class Recover {
     /**
      * 插入日志信息,xid,pageno,offset,raw
      */
-    static class InsertLogInfo{
+    static class InsertLogInfo {
         long xid;
         int pageNo;
         short offset;
@@ -44,7 +45,7 @@ public class Recover {
      * 旧数据
      * 新数据
      */
-    static class UpdateLogInfo{
+    static class UpdateLogInfo {
         long xid;
         int pageNo;
         short offset;
@@ -52,29 +53,29 @@ public class Recover {
         byte[] newRaw;
     }
 
-    public static void recover(TransactionManager tm, Logger logger, PageCache pageCache){
+    public static void recover(TransactionManager tm, Logger logger, PageCache pageCache) {
         System.out.println("Recovering ...........");
         //log回指针到第一条日志前
         logger.rewind();
 
         int maxPageNo = 0;
-        while(true){
+        while (true) {
             //获取下一条日志
             byte[] log = logger.next();
-            if(log == null) break;
+            if (log == null) break;
             int pageNo;
-            if(isInsertLog(log)){
+            if (isInsertLog(log)) {
                 InsertLogInfo insertLogInfo = parseInsertLog(log);
                 pageNo = insertLogInfo.pageNo;
-            }else{
+            } else {
                 UpdateLogInfo updateLogInfo = parseUpdateLog(log);
                 pageNo = updateLogInfo.pageNo;
             }
-            if(pageNo > maxPageNo){
+            if (pageNo > maxPageNo) {
                 maxPageNo = pageNo;
             }
         }
-        if(maxPageNo == 0){
+        if (maxPageNo == 0) {
             maxPageNo = 1;
         }
         pageCache.truncateByBgno(maxPageNo);
@@ -91,25 +92,26 @@ public class Recover {
 
     /**
      * 根据log redo恢复
+     *
      * @param transactionManager
      * @param logger
      * @param pageCache
      */
-    private static void redoTransactions(TransactionManager transactionManager, Logger logger, PageCache pageCache){
+    private static void redoTransactions(TransactionManager transactionManager, Logger logger, PageCache pageCache) {
         logger.rewind();
-        while(true){
+        while (true) {
             byte[] log = logger.next();
-            if(log == null) break;
-            if(isInsertLog(log)){
+            if (log == null) break;
+            if (isInsertLog(log)) {
                 InsertLogInfo insertLogInfo = parseInsertLog(log);
                 long xid = insertLogInfo.xid;
-                if(!transactionManager.isActive(xid)){
+                if (!transactionManager.isActive(xid)) {
                     doInsertLog(pageCache, log, REDO);
                 }
-            }else{
+            } else {
                 UpdateLogInfo updateLogInfo = parseUpdateLog(log);
                 long xid = updateLogInfo.xid;
-                if(!transactionManager.isActive(xid)){
+                if (!transactionManager.isActive(xid)) {
                     doUpdateLog(pageCache, log, REDO);
                 }
             }
@@ -118,33 +120,34 @@ public class Recover {
 
     /**
      * 根据log，undo恢复
+     *
      * @param transactionManager
      * @param logger
      * @param pageCache
      */
-    private static void undoTransactions(TransactionManager transactionManager, Logger logger, PageCache pageCache){
+    private static void undoTransactions(TransactionManager transactionManager, Logger logger, PageCache pageCache) {
         Map<Long, List<byte[]>> logCache = new HashMap<>();
         logger.rewind();
-        while(true){
+        while (true) {
             byte[] log = logger.next();
-            if(log == null) break;
+            if (log == null) break;
             //只需要对活跃状态的事务操作undo
             //如果是插入日志
-            if(isInsertLog(log)){
+            if (isInsertLog(log)) {
                 InsertLogInfo insertLogInfo = parseInsertLog(log);
                 long xid = insertLogInfo.xid;
                 //如果事务还是活跃状态，log缓存起来
-                if(transactionManager.isActive(xid)){
-                    if(!logCache.containsKey(xid)){
+                if (transactionManager.isActive(xid)) {
+                    if (!logCache.containsKey(xid)) {
                         logCache.put(xid, new ArrayList<>());
                     }
                     logCache.get(xid).add(log);
                 }
-            }else{
+            } else {
                 UpdateLogInfo updateLogInfo = parseUpdateLog(log);
                 long xid = updateLogInfo.xid;
-                if(transactionManager.isActive(xid)){
-                    if(!logCache.containsKey(xid)){
+                if (transactionManager.isActive(xid)) {
+                    if (!logCache.containsKey(xid)) {
                         logCache.put(xid, new ArrayList<>());
                     }
                     logCache.get(xid).add(log);
@@ -153,14 +156,14 @@ public class Recover {
         }
 
         //对所有的active log进行倒序undo
-        for(Entry<Long, List<byte[]>> entry : logCache.entrySet()){
+        for (Entry<Long, List<byte[]>> entry : logCache.entrySet()) {
             List<byte[]> logs = entry.getValue();
             //倒序遍历当前事务的所有日志
-            for(int i = logs.size() - 1; i >= 0; i--){
+            for (int i = logs.size() - 1; i >= 0; i--) {
                 byte[] log = logs.get(i);
-                if(isInsertLog(log)){
+                if (isInsertLog(log)) {
                     doInsertLog(pageCache, log, UNDO);
-                }else{
+                } else {
                     doUpdateLog(pageCache, log, UNDO);
                 }
             }
@@ -168,7 +171,7 @@ public class Recover {
         }
     }
 
-    private static boolean isInsertLog(byte[] log){
+    private static boolean isInsertLog(byte[] log) {
         return log[0] == LOG_TYPE_INSERT;
     }
 
@@ -180,11 +183,12 @@ public class Recover {
 
     /**
      * 生成update日志
+     *
      * @param xid
      * @param dataItem
      * @return
      */
-    public static byte[] updateLog(long xid, DataItem dataItem){
+    public static byte[] updateLog(long xid, DataItem dataItem) {
         byte[] logType = {LOG_TYPE_UPDATE};
         byte[] xidRaw = Parser.long2Byte(xid);
         byte[] uidRaw = Parser.long2Byte(dataItem.getUid());
@@ -196,10 +200,11 @@ public class Recover {
 
     /**
      * 根据日志解析出update日志信息
+     *
      * @param log
      * @return
      */
-    private static UpdateLogInfo parseUpdateLog(byte[] log){
+    private static UpdateLogInfo parseUpdateLog(byte[] log) {
         UpdateLogInfo updateLogInfo = new UpdateLogInfo();
         updateLogInfo.xid = Parser.parseLong(Arrays.copyOfRange(log, OF_XID, OF_UPDATE_UID));
         long uid = Parser.parseLong(Arrays.copyOfRange(log, OF_UPDATE_UID, OF_UPDATE_RAW));
@@ -209,20 +214,20 @@ public class Recover {
         //分两半，前面存旧数据，
         int length = (log.length - OF_UPDATE_RAW) / 2;
         updateLogInfo.oldRaw = Arrays.copyOfRange(log, OF_UPDATE_RAW, OF_UPDATE_RAW + length);
-        updateLogInfo.newRaw = Arrays.copyOfRange(log, OF_UPDATE_RAW + length, OF_UPDATE_RAW + length*2);
+        updateLogInfo.newRaw = Arrays.copyOfRange(log, OF_UPDATE_RAW + length, OF_UPDATE_RAW + length * 2);
         return updateLogInfo;
     }
 
-    private static void doUpdateLog(PageCache pageCache, byte[] log, int flag){
+    private static void doUpdateLog(PageCache pageCache, byte[] log, int flag) {
         int pageNo;
         short offset;
         byte[] raw;
-        if(flag == REDO){
+        if (flag == REDO) {
             UpdateLogInfo updateLogInfo = parseUpdateLog(log);
             pageNo = updateLogInfo.pageNo;
             offset = updateLogInfo.offset;
             raw = updateLogInfo.newRaw;
-        }else{
+        } else {
             UpdateLogInfo updateLogInfo = parseUpdateLog(log);
             pageNo = updateLogInfo.pageNo;
             offset = updateLogInfo.offset;
@@ -230,14 +235,14 @@ public class Recover {
         }
 
         Page page = null;
-        try{
+        try {
             page = pageCache.getPage(pageNo);
-        }catch (Exception e){
+        } catch (Exception e) {
             Panic.panic(e);
         }
-        try{
+        try {
             PageX.recoverUpdate(page, raw, offset);
-        }finally {
+        } finally {
             page.release();
         }
     }
@@ -248,7 +253,7 @@ public class Recover {
     private static final int OF_INSERT_OFFSET = OF_INSERT_PAGENO + 4;
     private static final int OF_INSERT_RAW = OF_INSERT_OFFSET + 2;
 
-    public static byte[] insertLog(long xid, Page page, byte[] raw){
+    public static byte[] insertLog(long xid, Page page, byte[] raw) {
         byte[] logTypeRaw = {LOG_TYPE_INSERT};
         byte[] xidRaw = Parser.long2Byte(xid);
         byte[] pageNoRaw = Parser.int2Byte(page.getPageNumber());
@@ -258,10 +263,11 @@ public class Recover {
 
     /**
      * 解析处insert日志信息
+     *
      * @param log
      * @return
      */
-    private static InsertLogInfo parseInsertLog(byte[] log){
+    private static InsertLogInfo parseInsertLog(byte[] log) {
         InsertLogInfo insertLogInfo = new InsertLogInfo();
         insertLogInfo.xid = Parser.parseLong(Arrays.copyOfRange(log, OF_XID, OF_INSERT_PAGENO));
         insertLogInfo.pageNo = Parser.parseInt(Arrays.copyOfRange(log, OF_INSERT_PAGENO, OF_INSERT_OFFSET));
@@ -272,26 +278,27 @@ public class Recover {
 
     /**
      * 执行insert日志
+     *
      * @param pageCache
      * @param log
      * @param flag
      */
-    private static void doInsertLog(PageCache pageCache, byte[] log, int flag){
+    private static void doInsertLog(PageCache pageCache, byte[] log, int flag) {
         InsertLogInfo insertLogInfo = parseInsertLog(log);
         Page page = null;
-        try{
+        try {
             page = pageCache.getPage(insertLogInfo.pageNo);
-        }catch (Exception e){
+        } catch (Exception e) {
             Panic.panic(e);
         }
-        try{
+        try {
             //如果是要执行undo，直接将插入日志里的数据置为无效数据
-            if(flag == UNDO) {
+            if (flag == UNDO) {
                 DataItem.setDataItemRawInvalid(insertLogInfo.raw);
             }
             //覆盖插入
             PageX.recoverInsert(page, insertLogInfo.raw, insertLogInfo.offset);
-        }finally {
+        } finally {
             page.release();
         }
     }

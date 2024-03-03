@@ -13,12 +13,14 @@ public class MockPage implements Page {
     private int pageNo;
     private byte[] data;
     private Lock lock = new ReentrantLock();
-    public static MockPage newMockPage(int pageNo, byte[] data){
+
+    public static MockPage newMockPage(int pageNo, byte[] data) {
         MockPage mockPage = new MockPage();
         mockPage.pageNo = pageNo;
         mockPage.data = data;
         return mockPage;
     }
+
     @Override
     public void lock() {
         lock.lock();

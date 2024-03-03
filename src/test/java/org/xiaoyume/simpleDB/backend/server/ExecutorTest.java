@@ -34,7 +34,7 @@ public class ExecutorTest {
 
     private void testInsert(Executor exe, int times, int no) throws Exception {
         for (int i = 0; i < times; i++) {
-            System.out.print(no+":"+i + ":");
+            System.out.print(no + ":" + i + ":");
             exe.execute(INSERT);
         }
     }
@@ -53,11 +53,11 @@ public class ExecutorTest {
         Executor exe = testCreate();
         // 这里必须用不同的executor，否则会出现并发问题
         TableManager tbm = exe.tbm;
-        int w = total/noWorkers;
+        int w = total / noWorkers;
         CountDownLatch cdl = new CountDownLatch(noWorkers);
-        for(int i = 0; i < noWorkers; i ++) {
+        for (int i = 0; i < noWorkers; i++) {
             final int no = i;
-            new Thread(new Runnable(){
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
